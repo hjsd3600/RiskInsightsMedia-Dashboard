@@ -3,6 +3,45 @@ import pandas as pd
 import streamlit as st
 from snowflake.snowpark import Session
 from datetime import datetime
+import streamlit_authenticator as stauth
+from collections.abc import Mapping
+
+def to_plain_dict(x):
+    if isinstance(x, Mapping):
+        return {k: to_plain_dict(v) for k, v in x.items()}
+    return x
+
+def require_login():
+    auth_cfg = st.secrets["auth"]
+
+    credentials = to_plain_dict(auth_cfg["credentials"])
+
+    authenticator = stauth.Authenticate(
+        credentials=credentials,
+        cookie_name=auth_cfg["cookie_name"],
+        key=auth_cfg["cookie_key"],
+    )
+
+    authenticator.login("main")
+
+    authentication_status = st.session_state.get("authentication_status")
+    name = st.session_state.get("name")
+
+    if authentication_status is True:
+        authenticator.logout("Logout", "sidebar")
+        st.sidebar.success(f"Logged in as {name}")
+        return
+
+    if authentication_status is False:
+        st.error("Invalid email or password")
+        st.stop()
+
+    st.info("Please log in to access the dashboard.")
+    st.stop()
+
+# AUTH GATE — NOTHING BELOW RUNS WITHOUT LOGIN
+require_login()
+
 
 # ============================================================
 # Snowflake session
@@ -19,7 +58,7 @@ def get_session():
     }
     return Session.builder.configs(connection_parameters).create()
 
-session = get_session()
+
 
 
 # ============================================================
@@ -75,6 +114,7 @@ def parse_funding_amount(series: pd.Series) -> pd.Series:
 # ============================================================
 @st.cache_data(ttl=300)
 def load_data():
+    session = get_session()
     # COMPANIES table
     companies = session.sql("""
         SELECT
@@ -140,6 +180,7 @@ def load_data():
 
 def get_last_updated():
     try:
+        session = get_session()
         df = session.sql("""
             SELECT MAX(updated_at) AS last_update
             FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
