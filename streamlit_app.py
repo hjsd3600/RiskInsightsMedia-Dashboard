@@ -1,19 +1,11 @@
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 from snowflake.snowpark import Session
 import streamlit as st
+from cryptography.hazmat.primitives import serialization
 
 def get_session():
     private_key = serialization.load_pem_private_key(
         st.secrets["snowflake"]["private_key"].encode(),
         password=None,
-        backend=default_backend()
-    )
-
-    pkb = private_key.private_bytes(
-        encoding=serialization.Encoding.DER,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
     )
 
     connection_parameters = {
@@ -23,10 +15,11 @@ def get_session():
         "warehouse": st.secrets["snowflake"]["warehouse"],
         "database": st.secrets["snowflake"]["database"],
         "schema": st.secrets["snowflake"]["schema"],
-        "private_key": pkb,
+        "private_key": private_key,
     }
 
     return Session.builder.configs(connection_parameters).create()
+
 
 # ============================================================
 # Helpers
@@ -460,4 +453,5 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
