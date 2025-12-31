@@ -1,7 +1,8 @@
 streamlit
+cryptography
 snowflake-snowpark-python
 snowflake-connector-python
 pandas
 
 numpy
-cryptography
+
