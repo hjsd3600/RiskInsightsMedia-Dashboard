@@ -1,3 +1,7 @@
+import os
+from datetime import datetime
+import numpy as np
+import pandas as pd     
 from snowflake.snowpark import Session
 import streamlit as st
 from cryptography.hazmat.primitives import serialization
@@ -454,6 +458,7 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
 
 
