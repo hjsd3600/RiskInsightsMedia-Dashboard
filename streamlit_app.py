@@ -5,7 +5,7 @@ from cryptography.hazmat.primitives import serialization
 def get_session():
     private_key = serialization.load_pem_private_key(
         st.secrets["snowflake"]["private_key"].encode(),
-        password=None,
+        password=None
     )
 
     connection_parameters = {
@@ -20,6 +20,7 @@ def get_session():
 
     return Session.builder.configs(connection_parameters).create()
 
+session = get_session()
 
 # ============================================================
 # Helpers
@@ -453,5 +454,6 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
 
