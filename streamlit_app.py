@@ -175,7 +175,7 @@ def display_table(df: pd.DataFrame, table_name: str):
         "lead_investor": "Lead Investor",
         "website_url": "Website",
         "linkedin_url": "LinkedIn",
-        "employee_count": "EMPLOYEE_COUNT"
+        "EMPLOYEE_COUNT": "employee_count"
     }
 
     df.rename(
@@ -459,6 +459,7 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
 
 
