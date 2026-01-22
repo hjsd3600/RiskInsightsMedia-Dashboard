@@ -86,7 +86,8 @@ def load_data():
             website      AS website_url,   -- <== IMPORTANT FIX
             linkedin_url,
             category_group,
-            status
+            status,
+            employee_count
         FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
     """).to_pandas()
 
@@ -173,7 +174,8 @@ def display_table(df: pd.DataFrame, table_name: str):
         "amount_raised_total": "Amount Raised Total",
         "lead_investor": "Lead Investor",
         "website_url": "Website",
-        "linkedin_url": "LinkedIn"
+        "linkedin_url": "LinkedIn",
+        "employee_count": "EMPLOYEE_COUNT"
     }
 
     df.rename(
@@ -457,6 +459,7 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
 
 
