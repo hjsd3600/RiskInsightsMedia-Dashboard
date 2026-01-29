@@ -5,6 +5,7 @@ from snowflake.snowpark import Session
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
 
+@st.cache_resource
 def get_session():
     private_key = serialization.load_pem_private_key(
         st.secrets["snowflake"]["private_key"].encode(),
@@ -459,6 +460,7 @@ elif selected_table == "companies":
     display_table(companies_filtered, "companies")
 
 st.caption("Dashboard loads live data from Snowflake.")
+
 
 
 
