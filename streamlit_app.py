@@ -1,11 +1,48 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit_authenticator as stauth
+
+# Build credentials dictionary safely from secrets
+credentials = {
+    "usernames": {
+        username: {
+            "email": user_data["email"],
+            "name": user_data["name"],
+            "password": user_data["password"],
+        }
+        for username, user_data in st.secrets["credentials"]["usernames"].items()
+    }
+}
+
+authenticator = stauth.Authenticate(
+    credentials,
+    st.secrets["cookie"]["name"],
+    st.secrets["cookie"]["key"],
+    st.secrets["cookie"]["expiry_days"],
+    auto_hash=False,
+)
+
+try:
+    authenticator.login()
+except Exception as e:
+    st.error(e)
+
+if st.session_state.get("authentication_status") is False:
+    st.error("Username/password is incorrect")
+    st.stop()
+
+if st.session_state.get("authentication_status") is None:
+    st.warning("Please enter your username and password")
+    st.stop()
+
+authenticator.logout("Logout", "sidebar")
+
 from snowflake.snowpark import Session
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def get_session():
     private_key = serialization.load_pem_private_key(
         st.secrets["snowflake"]["private_key"].encode(),
@@ -24,7 +61,7 @@ def get_session():
 
     return Session.builder.configs(connection_parameters).create()
 
-session = get_session()
+#session = get_session()
 
 # ============================================================
 # Helpers
@@ -78,9 +115,9 @@ def parse_funding_amount(series: pd.Series) -> pd.Series:
 # Load data from Snowflake
 # ============================================================
 @st.cache_data(ttl=300)
-def load_data():
+def load_data(_session):
     # COMPANIES table
-    companies = session.sql("""
+    companies = _session.sql("""
         SELECT
             company_id,
             company_name,
@@ -93,7 +130,7 @@ def load_data():
     """).to_pandas()
 
     # FUNDING_ROUNDS table
-    funding = session.sql("""
+    funding = _session.sql("""
         SELECT
             round_id,
             company_id,
@@ -143,9 +180,9 @@ def load_data():
     return companies, funding, merged
 
 
-def get_last_updated():
+def get_last_updated(_session):
     try:
-        df = session.sql("""
+        df = _session.sql("""
             SELECT MAX(updated_at) AS last_update
             FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
         """).to_pandas()
@@ -205,7 +242,7 @@ def display_table(df: pd.DataFrame, table_name: str):
         st.caption(f"{len(view_df)} rows")
 
     # Show table (no download button)
-    st.dataframe(view_df, use_container_width=True, hide_index=True)
+    st.dataframe(view_df, width="stretch", hide_index=True)
 
 
 # ============================================================
@@ -216,7 +253,8 @@ st.set_page_config(page_title="Funding Intelligence Dashboard", layout="wide")
 st.title("Funding Intelligence Dashboard")
 st.caption("Explore funding rounds, investors, categories, and companies from Snowflake.")
 
-companies_df, funding_df, merged_df = load_data()
+session = get_session()
+companies_df, funding_df, merged_df = load_data(session)
 
 if funding_df.empty or companies_df.empty:
     st.error("No data available in Snowflake.")
@@ -250,7 +288,7 @@ selected_table = st.sidebar.selectbox(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Last updated: **{get_last_updated()}**")
+st.sidebar.caption(f"Last updated: **{get_last_updated(session)}**")
 
 
 # ============================================================
@@ -420,9 +458,9 @@ with tab3:
                 linkedin = format_url(row.get("linkedin_url"))
 
                 if website:
-                    st.link_button("Website", website, use_container_width=True)
+                    st.link_button("Website", website, width="stretch")
                 if linkedin:
-                    st.link_button("LinkedIn", linkedin, use_container_width=True)
+                    st.link_button("LinkedIn", linkedin, width="stretch")
 
             with cols[1]:
                 tf = (
