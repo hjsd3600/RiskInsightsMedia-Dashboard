@@ -41,6 +41,7 @@ authenticator.logout("Logout", "sidebar")
 from snowflake.snowpark import Session
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
+import uuid
 
 @st.cache_resource(show_spinner=False)
 def get_session():
@@ -343,10 +344,26 @@ k5.metric("Top Funded Company", top_company)
 st.markdown("---")
 
 
+# Check if logged-in user is admin
+_current_user = st.session_state.get("username", "").lower()
+is_admin = _current_user == "jeremy"
+is_contributor = _current_user == "jitesh"
+
 # ============================================================
 # Tabs
 # ============================================================
-tab1, tab2, tab3 = st.tabs(["Rounds Analysis", "Investors", "Company Explorer"])
+tab_list = ["Rounds Analysis", "Investors", "Company Explorer"]
+if is_admin:
+    tab_list.append("Admin Panel")
+elif is_contributor:
+    tab_list.append("Contributor Panel")
+
+tabs = st.tabs(tab_list)
+tab1 = tabs[0]
+tab2 = tabs[1]
+tab3 = tabs[2]
+tab4 = tabs[3] if (is_admin or is_contributor) else None
+
 
 # -------------------------
 # Tab 1: Rounds Analysis
@@ -500,7 +517,547 @@ elif selected_table == "companies":
 st.caption("Dashboard loads live data from Snowflake.")
 
 
+# ============================================================
+# Admin Panel (Jeremy only — Direct Edit)
+# ============================================================
+if is_admin and tab4 is not None:
+    with tab4:
+        st.markdown("### 🔒 Admin Panel")
+        st.caption("Only you can see this tab. Use the forms below to manage data in Snowflake.")
 
+        admin_tab1, admin_tab2, admin_tab3, admin_tab4 = st.tabs([
+            "➕ Add Company",
+            "✏️ Update Company",
+            "💰 Log Funding Round",
+            "📋 Review Suggestions"
+        ])
+
+        # -------------------------
+        # Admin Sub-Tab 1: Add Company
+        # -------------------------
+        with admin_tab1:
+            st.markdown("#### Add a New Company")
+            MARKET_SEGMENTS = [
+                "",
+                "Cloud & Application Security",
+                "Data Security & AI Security",
+                "Endpoint & IoT/OT Security",
+                "Identity",
+                "Network & Infrastructure Security",
+                "Risk & Compliance",
+                "Security Awareness & Training",
+                "Security Operations",
+                "Security Services",
+            ]
+
+            CATEGORIES = [
+                "",
+                "API Security", "Access Management (AM)", "Anomaly Detection (IoT/OT)",
+                "Anti-phishing and Simulated Phishing", "Application Detection & Response (ADR)",
+                "Application Security Orchestration and Correlation (ASOC)",
+                "Application Security Posture Management (ASPM)",
+                "Application Security Testing (AST)", "Attack Surface Management (ASM)",
+                "Automated Penetration Testing", "Automated Security Control Assessment (ASCA)",
+                "Backup and Recovery", "Bot Detection & Mitigation",
+                "Breach and Attack Simulation (BAS)", "Cloud Access Security Broker (CASB)",
+                "Cloud Detection & Response (CDR)", "Cloud IAM", "Cloud Identity Federation",
+                "Cloud Infrastructure Entitlements Management (CIEM)",
+                "Cloud Native Application Protection Platforms (CNAPP)",
+                "Cloud Security Posture Management (CSPM)",
+                "Cloud Workload Protection Platforms (CWPP)", "Compliance Management",
+                "Container Security", "Continuous Threat Exposure Management (CTEM)",
+                "Customer Identity", "Cyber Asset Attack Surface Management (CAASM)",
+                "Cyber Insurance", "Cyber Range", "Cyber Risk Quantification",
+                "Cybersecurity Education & Training", "DDoS Mitigation",
+                "Data Loss Prevention (DLP)", "Data Security Posture Management (DSPM)",
+                "Deception Platform", "Dynamic Application Security Testing (DAST)",
+                "Email Security Software", "Encryption Key Management System (EKMS)",
+                "Endpoint Detection and Response (EDR)", "Endpoint Protection Platform (EPP)",
+                "Enterprise Browser Security", "Enterprise Email Security",
+                "Extended Detection and Response (XDR)",
+                "External Attack Surface Management (EASM)",
+                "Forensic and Incident Response", "Fraud Prevention",
+                "Fraud and Financial Crime Protection",
+                "Governance, Risk, and Compliance (GRC)",
+                "Host-Based Intrusion Detection Systems (HIDS)", "Human Risk Management",
+                "Identity Governance and Administration (IGA)",
+                "Identity Threat and Detection Response (ITDR)", "Identity Verification",
+                "Identity and Access Management (IAM)", "Incident Response",
+                "Industrial Controls Systems (ICS) Security", "Industrial IoT Security",
+                "Insider Risk Management (IRM)", "Integrated Cloud Email Security (ICES)",
+                "Intrusion Detection System (IDS)",
+                "Intrusion Detection and Prevention Systems (IDPS)", "IoT Security",
+                "Managed Detection and Response (MDR)", "Managed Security Services",
+                "Mobile Application Security Testing", "Mobile Data Protection (MDP)",
+                "Mobile Device Management (MDM)", "Mobile Threat Defense",
+                "Network Access Control (NAC)", "Network Detection and Response (NDR)",
+                "Network-Based Intrusion Detection Systems (NIDS)",
+                "Operational Technology (OT) Security", "Password Management",
+                "Patch Management", "Penetration Testing", "Privacy",
+                "Privilege Elevation & Delegation Management (PEDM)",
+                "Privileged Access Management (PAM)",
+                "Privileged Account & Session Management (PASM)",
+                "Privileged Identity Management (PIM)",
+                "Risk Management & Compliance", "Risk-Based Vulnerability Management (RBVM)",
+                "Runtime Application Self-Protection (RASP)",
+                "SaaS Security Posture Management (SSPM)",
+                "Secure Access Service Edge (SASE)", "Secure Collaboration and Messaging",
+                "Secure Remote Access", "Secure Web Gateway (SWG)",
+                "Security Awareness Computer-Based Training (SACBT)",
+                "Security Awareness Training (SAT)",
+                "Security Information and Event Management (SIEM)",
+                "Security Orchestration and Automated Response (SOAR)",
+                "Security Service Edge (SSE)", "Single Sign-On (SSO)",
+                "Software Composition Analysis (SCA)", "Software Supply Chain Security",
+                "Third-Party Risk Management (TPRM)", "Unified Threat Management (UTM)",
+                "VPN Firewalls", "Vendor Risk Management", "Virtual Private Networks (VPNs)",
+                "Vulnerability Assessment", "Vulnerability Management (IoT/OT)",
+                "Vulnerability Management (VM)", "Vulnerability Risk Management (VRM)",
+                "Web Application Firewall (WAF)",
+                "Web Application and API Protection (WAAP)", "Wireless Security",
+                "Zero Trust Edge Solutions (ZTE)", "Zero Trust Network Access (ZTNA)",
+            ]
+
+            with st.form("add_company_form"):
+                new_name        = st.text_input("Company Name *", placeholder="e.g. Acme Corp")
+                new_website     = st.text_input("Website", placeholder="e.g. https://acme.com")
+                new_linkedin    = st.text_input("LinkedIn URL", placeholder="e.g. https://linkedin.com/company/acme")
+                new_segment     = st.selectbox("Market Segment", MARKET_SEGMENTS)
+                new_category    = st.selectbox("Category", CATEGORIES)
+                new_status      = st.selectbox("Status", ["", "Active", "Acquired", "Closed", "IPO", "Unknown"])
+                new_employees   = st.text_input("Employee Count", placeholder="e.g. 50, 200-500")
+
+                submitted = st.form_submit_button("Add Company ✅")
+                if submitted:
+                    if not new_name.strip():
+                        st.error("Company Name is required.")
+                    else:
+                        try:
+                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            new_company_id = str(uuid.uuid4())
+                            now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+                            def _q(val):
+                                """Return SQL-quoted string or NULL."""
+                                if val is None or str(val).strip() == "":
+                                    return "NULL"
+                                return "'" + str(val).replace("'", "''") + "'"
+
+                            sql = f"""
+                                INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
+                                (COMPANY_ID, COMPANY_NAME, WEBSITE, LINKEDIN_URL,
+                                 CATEGORY_GROUP, STATUS, EMPLOYEE_COUNT,
+                                 CREATED_AT, UPDATED_AT)
+                                VALUES (
+                                    {_q(new_company_id)},
+                                    {_q(new_name.strip())},
+                                    {_q(new_website.strip())},
+                                    {_q(new_linkedin.strip())},
+                                    {_q(new_category)},
+                                    {_q(new_status)},
+                                    {_q(new_employees.strip())},
+                                    TO_TIMESTAMP_NTZ({_q(now_str)}),
+                                    TO_TIMESTAMP_NTZ({_q(now_str)})
+                                )
+                            """
+                            session.sql(sql).collect()
+                            st.success(f"✅ Company '{new_name}' added successfully!")
+                            st.cache_data.clear()
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Error adding company: {e}")
+
+
+        # -------------------------
+        # Admin Sub-Tab 2: Update Company
+        # -------------------------
+        with admin_tab2:
+            st.markdown("#### Update an Existing Company")
+            company_options = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            company_map = dict(zip(company_options["company_name"], company_options["company_id"]))
+
+            selected_company = st.selectbox(
+                "Select Company to Update",
+                options=[""] + list(company_map.keys()),
+                key="update_company_select"
+            )
+
+            if selected_company:
+                cid = company_map[selected_company]
+                current = companies_df[companies_df["company_id"] == cid].iloc[0]
+
+                CATEGORIES = [
+                    "",
+                    "API Security", "Access Management (AM)", "Anomaly Detection (IoT/OT)",
+                    "Anti-phishing and Simulated Phishing", "Application Detection & Response (ADR)",
+                    "Application Security Orchestration and Correlation (ASOC)",
+                    "Application Security Posture Management (ASPM)",
+                    "Application Security Testing (AST)", "Attack Surface Management (ASM)",
+                    "Automated Penetration Testing", "Automated Security Control Assessment (ASCA)",
+                    "Backup and Recovery", "Bot Detection & Mitigation",
+                    "Breach and Attack Simulation (BAS)", "Cloud Access Security Broker (CASB)",
+                    "Cloud Detection & Response (CDR)", "Cloud IAM", "Cloud Identity Federation",
+                    "Cloud Infrastructure Entitlements Management (CIEM)",
+                    "Cloud Native Application Protection Platforms (CNAPP)",
+                    "Cloud Security Posture Management (CSPM)",
+                    "Cloud Workload Protection Platforms (CWPP)", "Compliance Management",
+                    "Container Security", "Continuous Threat Exposure Management (CTEM)",
+                    "Customer Identity", "Cyber Asset Attack Surface Management (CAASM)",
+                    "Cyber Insurance", "Cyber Range", "Cyber Risk Quantification",
+                    "Cybersecurity Education & Training", "DDoS Mitigation",
+                    "Data Loss Prevention (DLP)", "Data Security Posture Management (DSPM)",
+                    "Deception Platform", "Dynamic Application Security Testing (DAST)",
+                    "Email Security Software", "Encryption Key Management System (EKMS)",
+                    "Endpoint Detection and Response (EDR)", "Endpoint Protection Platform (EPP)",
+                    "Enterprise Browser Security", "Enterprise Email Security",
+                    "Extended Detection and Response (XDR)",
+                    "External Attack Surface Management (EASM)",
+                    "Forensic and Incident Response", "Fraud Prevention",
+                    "Fraud and Financial Crime Protection",
+                    "Governance, Risk, and Compliance (GRC)",
+                    "Host-Based Intrusion Detection Systems (HIDS)", "Human Risk Management",
+                    "Identity Governance and Administration (IGA)",
+                    "Identity Threat and Detection Response (ITDR)", "Identity Verification",
+                    "Identity and Access Management (IAM)", "Incident Response",
+                    "Industrial Controls Systems (ICS) Security", "Industrial IoT Security",
+                    "Insider Risk Management (IRM)", "Integrated Cloud Email Security (ICES)",
+                    "Intrusion Detection System (IDS)",
+                    "Intrusion Detection and Prevention Systems (IDPS)", "IoT Security",
+                    "Managed Detection and Response (MDR)", "Managed Security Services",
+                    "Mobile Application Security Testing", "Mobile Data Protection (MDP)",
+                    "Mobile Device Management (MDM)", "Mobile Threat Defense",
+                    "Network Access Control (NAC)", "Network Detection and Response (NDR)",
+                    "Network-Based Intrusion Detection Systems (NIDS)",
+                    "Operational Technology (OT) Security", "Password Management",
+                    "Patch Management", "Penetration Testing", "Privacy",
+                    "Privilege Elevation & Delegation Management (PEDM)",
+                    "Privileged Access Management (PAM)",
+                    "Privileged Account & Session Management (PASM)",
+                    "Privileged Identity Management (PIM)",
+                    "Risk Management & Compliance", "Risk-Based Vulnerability Management (RBVM)",
+                    "Runtime Application Self-Protection (RASP)",
+                    "SaaS Security Posture Management (SSPM)",
+                    "Secure Access Service Edge (SASE)", "Secure Collaboration and Messaging",
+                    "Secure Remote Access", "Secure Web Gateway (SWG)",
+                    "Security Awareness Computer-Based Training (SACBT)",
+                    "Security Awareness Training (SAT)",
+                    "Security Information and Event Management (SIEM)",
+                    "Security Orchestration and Automated Response (SOAR)",
+                    "Security Service Edge (SSE)", "Single Sign-On (SSO)",
+                    "Software Composition Analysis (SCA)", "Software Supply Chain Security",
+                    "Third-Party Risk Management (TPRM)", "Unified Threat Management (UTM)",
+                    "VPN Firewalls", "Vendor Risk Management", "Virtual Private Networks (VPNs)",
+                    "Vulnerability Assessment", "Vulnerability Management (IoT/OT)",
+                    "Vulnerability Management (VM)", "Vulnerability Risk Management (VRM)",
+                    "Web Application Firewall (WAF)",
+                    "Web Application and API Protection (WAAP)", "Wireless Security",
+                    "Zero Trust Edge Solutions (ZTE)", "Zero Trust Network Access (ZTNA)",
+                ]
+                STATUS_OPTIONS = ["", "Active", "Acquired", "Closed", "IPO", "Unknown"]
+
+                with st.form("update_company_form"):
+                    upd_name = st.text_input("Company Name", value=str(current.get("company_name", "") or ""))
+                    upd_website = st.text_input("Website", value=str(current.get("website_url", "") or ""))
+                    upd_linkedin = st.text_input("LinkedIn URL", value=str(current.get("linkedin_url", "") or ""))
+                    MARKET_SEGMENTS_UPD = [
+                        "", "Cloud & Application Security", "Data Security & AI Security",
+                        "Endpoint & IoT/OT Security", "Identity",
+                        "Network & Infrastructure Security", "Risk & Compliance",
+                        "Security Awareness & Training", "Security Operations", "Security Services",
+                    ]
+                    upd_segment = st.selectbox("Market Segment", MARKET_SEGMENTS_UPD)
+                    cur_cat = str(current.get("category_group", "") or "")
+                    upd_category = st.selectbox(
+                        "Category",
+                        CATEGORIES,
+                        index=CATEGORIES.index(cur_cat) if cur_cat in CATEGORIES else 0
+                    )
+                    upd_status = st.selectbox(
+                        "Status",
+                        STATUS_OPTIONS,
+                        index=STATUS_OPTIONS.index(current.get("status", "") or ""
+                        ) if (current.get("status", "") or "") in STATUS_OPTIONS else 0
+                    )
+                    upd_employees = st.number_input(
+                        "Employee Count",
+                        min_value=0, step=1,
+                        value=int(current.get("employee_count", 0) or 0)
+                    )
+
+
+                    submitted2 = st.form_submit_button("Save Changes ✅")
+                    if submitted2:
+                        try:
+                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            session.sql(f"""
+                                UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
+                                SET
+                                    company_name   = {repr(upd_name.strip())},
+                                    website        = {repr(upd_website.strip()) if upd_website.strip() else 'NULL'},
+                                    linkedin_url   = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
+                                    category_group = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
+                                    status         = {repr(upd_status) if upd_status else 'NULL'},
+                                    employee_count = {int(upd_employees) if upd_employees else 'NULL'}
+                                WHERE company_id = {repr(str(cid))}
+                            """).collect()
+                            st.success(f"✅ Company '{upd_name}' updated successfully!")
+                            st.cache_data.clear()
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Error updating company: {e}")
+
+        # -------------------------
+        # Admin Sub-Tab 3: Log Funding Round
+        # -------------------------
+        with admin_tab3:
+            st.markdown("#### Log a New Funding Round")
+            company_options2 = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            company_map2 = dict(zip(company_options2["company_name"], company_options2["company_id"]))
+
+            with st.form("add_funding_form"):
+                fr_company = st.selectbox(
+                    "Company *",
+                    options=[""] + list(company_map2.keys()),
+                    key="funding_company_select"
+                )
+                fr_stage = st.text_input("Funding Stage / Round *", placeholder="e.g. Series A, Seed")
+                fr_amount = st.text_input("Amount Raised", placeholder="e.g. 5M, 1.2B")
+                fr_investor = st.text_input("Lead Investor", placeholder="e.g. Sequoia Capital")
+                fr_website = st.text_input("Website", placeholder="e.g. https://company.com")
+                fr_linkedin = st.text_input("LinkedIn URL", placeholder="e.g. https://linkedin.com/company/x")
+
+                submitted3 = st.form_submit_button("Log Funding Round ✅")
+                if submitted3:
+                    if not fr_company or not fr_stage.strip():
+                        st.error("Company and Funding Stage are required.")
+                    else:
+                        try:
+                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            cid2 = company_map2[fr_company]
+                            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                            session.sql(f"""
+                                INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
+                                (company_id, company_name, stage_or_funding_round,
+                                 amount_raised_total, lead_investor, website_url, linkedin_url,
+                                 created_at, updated_at)
+                                VALUES
+                                ({repr(str(cid2))},
+                                 {repr(fr_company)},
+                                 {repr(fr_stage.strip())},
+                                 {repr(fr_amount.strip()) if fr_amount.strip() else 'NULL'},
+                                 {repr(fr_investor.strip()) if fr_investor.strip() else 'NULL'},
+                                 {repr(fr_website.strip()) if fr_website.strip() else 'NULL'},
+                                 {repr(fr_linkedin.strip()) if fr_linkedin.strip() else 'NULL'},
+                                 '{now}', '{now}')
+                            """).collect()
+                            st.success(f"✅ Funding round logged for '{fr_company}'!")
+                            st.cache_data.clear()
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Error logging funding round: {e}")
+
+        # -------------------------
+        # Admin Sub-Tab 4: Review Suggestions
+        # -------------------------
+        with admin_tab4:
+            st.markdown("#### 📋 Pending Suggestions from Contributors")
+            try:
+                session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                # Create suggestions table if it doesn't exist
+                session.sql("""
+                    CREATE TABLE IF NOT EXISTS RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS (
+                        suggestion_id VARCHAR PRIMARY KEY,
+                        submitted_by VARCHAR,
+                        submission_type VARCHAR,
+                        company_name VARCHAR,
+                        field_name VARCHAR,
+                        old_value VARCHAR,
+                        new_value VARCHAR,
+                        notes VARCHAR,
+                        status VARCHAR DEFAULT 'pending',
+                        submitted_at TIMESTAMP,
+                        reviewed_at TIMESTAMP
+                    )
+                """).collect()
+
+                suggestions_df = session.sql("""
+                    SELECT suggestion_id, submitted_by, submission_type, company_name,
+                           field_name, old_value, new_value, notes, status, submitted_at
+                    FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS
+                    WHERE status = 'pending'
+                    ORDER BY submitted_at DESC
+                """).to_pandas()
+
+                if suggestions_df.empty:
+                    st.info("✅ No pending suggestions right now.")
+                else:
+                    suggestions_df.columns = suggestions_df.columns.str.lower()
+                    st.caption(f"{len(suggestions_df)} pending suggestion(s)")
+                    for _, row in suggestions_df.iterrows():
+                        with st.container(border=True):
+                            col_info, col_actions = st.columns([3, 1])
+                            with col_info:
+                                st.markdown(f"**{row['submission_type']}** — {row['company_name']}")
+                                st.write(f"Field: `{row['field_name']}` → **{row['new_value']}**")
+                                if row.get('notes'):
+                                    st.caption(f"Note: {row['notes']}")
+                                st.caption(f"Submitted by {row['submitted_by']} at {row['submitted_at']}")
+                            with col_actions:
+                                sid = str(row['suggestion_id'])
+                                if st.button("✅ Approve", key=f"approve_{sid}"):
+                                    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                                    session.sql(f"""
+                                        UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS
+                                        SET status = 'approved', reviewed_at = '{now}'
+                                        WHERE suggestion_id = '{sid}'
+                                    """).collect()
+                                    st.success("Approved!")
+                                    st.cache_data.clear()
+                                    st.rerun()
+                                if st.button("❌ Reject", key=f"reject_{sid}"):
+                                    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                                    session.sql(f"""
+                                        UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS
+                                        SET status = 'rejected', reviewed_at = '{now}'
+                                        WHERE suggestion_id = '{sid}'
+                                    """).collect()
+                                    st.warning("Rejected.")
+                                    st.rerun()
+            except Exception as e:
+                st.error(f"❌ Could not load suggestions: {e}")
+
+
+# ============================================================
+# Contributor Panel (jitesh — Suggest Edits only)
+# ============================================================
+if is_contributor and tab4 is not None:
+    with tab4:
+        st.markdown("### ✏️ Contributor Panel")
+        st.caption("Suggest edits to company or funding data. Jeremy will review and approve your suggestions.")
+
+        c_tab1, c_tab2 = st.tabs(["🏢 Suggest Company Edit", "💡 Suggest New Entry"])
+
+        # -------------------------
+        # Contributor Sub-Tab 1: Suggest Company Edit
+        # -------------------------
+        with c_tab1:
+            st.markdown("#### Suggest a change to an existing company")
+            c_options = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            c_map = dict(zip(c_options["company_name"], c_options["company_id"]))
+
+            c_selected = st.selectbox("Select Company", [""] + list(c_map.keys()), key="contrib_company_select")
+
+            if c_selected:
+                c_current = companies_df[companies_df["company_id"] == c_map[c_selected]].iloc[0]
+
+                with st.form("suggest_edit_form"):
+                    field_to_edit = st.selectbox("Which field to update?", [
+                        "company_name", "website", "linkedin_url", "category_group", "status", "employee_count"
+                    ])
+                    old_val = str(c_current.get(field_to_edit, "") or "")
+                    st.text_input("Current value (read-only)", value=old_val, disabled=True)
+                    new_val = st.text_input("Suggested new value *")
+                    notes = st.text_area("Notes / reason for change", placeholder="Optional: explain why this change is needed")
+
+                    submitted_c = st.form_submit_button("Submit Suggestion 📤")
+                    if submitted_c:
+                        if not new_val.strip():
+                            st.error("Please enter the new value.")
+                        else:
+                            try:
+                                session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                                session.sql("""
+                                    CREATE TABLE IF NOT EXISTS RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS (
+                                        suggestion_id VARCHAR PRIMARY KEY,
+                                        submitted_by VARCHAR,
+                                        submission_type VARCHAR,
+                                        company_name VARCHAR,
+                                        field_name VARCHAR,
+                                        old_value VARCHAR,
+                                        new_value VARCHAR,
+                                        notes VARCHAR,
+                                        status VARCHAR DEFAULT 'pending',
+                                        submitted_at TIMESTAMP,
+                                        reviewed_at TIMESTAMP
+                                    )
+                                """).collect()
+                                now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                                sid = str(uuid.uuid4())
+                                session.sql(f"""
+                                    INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS
+                                    (suggestion_id, submitted_by, submission_type, company_name,
+                                     field_name, old_value, new_value, notes, status, submitted_at)
+                                    VALUES
+                                    ('{sid}',
+                                     '{st.session_state.get("username")}',
+                                     'Company Edit',
+                                     {repr(c_selected)},
+                                     {repr(field_to_edit)},
+                                     {repr(old_val)},
+                                     {repr(new_val.strip())},
+                                     {repr(notes.strip()) if notes.strip() else 'NULL'},
+                                     'pending', '{now}')
+                                """).collect()
+                                st.success("✅ Suggestion submitted! Jeremy will review it shortly.")
+                            except Exception as e:
+                                st.error(f"❌ Error submitting suggestion: {e}")
+
+        # -------------------------
+        # Contributor Sub-Tab 2: Suggest New Entry
+        # -------------------------
+        with c_tab2:
+            st.markdown("#### Suggest a completely new company or funding round to add")
+            with st.form("suggest_new_form"):
+                new_type = st.selectbox("Type of entry", ["New Company", "New Funding Round"])
+                new_co_name = st.text_input("Company Name *")
+                new_field = st.text_input(
+                    "Key detail *",
+                    placeholder="For company: website URL. For funding round: e.g. Series A — $5M"
+                )
+                new_notes = st.text_area("Additional notes / source", placeholder="Where did you find this info?")
+
+                submitted_new = st.form_submit_button("Submit Suggestion 📤")
+                if submitted_new:
+                    if not new_co_name.strip() or not new_field.strip():
+                        st.error("Company Name and Key detail are required.")
+                    else:
+                        try:
+                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            session.sql("""
+                                CREATE TABLE IF NOT EXISTS RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS (
+                                    suggestion_id VARCHAR PRIMARY KEY,
+                                    submitted_by VARCHAR,
+                                    submission_type VARCHAR,
+                                    company_name VARCHAR,
+                                    field_name VARCHAR,
+                                    old_value VARCHAR,
+                                    new_value VARCHAR,
+                                    notes VARCHAR,
+                                    status VARCHAR DEFAULT 'pending',
+                                    submitted_at TIMESTAMP,
+                                    reviewed_at TIMESTAMP
+                                )
+                            """).collect()
+                            now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                            sid = str(uuid.uuid4())
+                            session.sql(f"""
+                                INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.EDIT_SUGGESTIONS
+                                (suggestion_id, submitted_by, submission_type, company_name,
+                                 field_name, old_value, new_value, notes, status, submitted_at)
+                                VALUES
+                                ('{sid}',
+                                 '{st.session_state.get("username")}',
+                                 {repr(new_type)},
+                                 {repr(new_co_name.strip())},
+                                 'new_entry',
+                                 NULL,
+                                 {repr(new_field.strip())},
+                                 {repr(new_notes.strip()) if new_notes.strip() else 'NULL'},
+                                 'pending', '{now}')
+                            """).collect()
+                            st.success("✅ Suggestion submitted! Jeremy will review it shortly.")
+                        except Exception as e:
+                            st.error(f"❌ Error submitting suggestion: {e}")
 
 
 
