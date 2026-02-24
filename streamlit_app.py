@@ -58,6 +58,7 @@ def get_session():
         "database": st.secrets["snowflake"]["database"],
         "schema": st.secrets["snowflake"]["schema"],
         "private_key": private_key,
+        "client_session_keep_alive": True,  # Prevent token expiry on Streamlit Cloud
     }
 
     return Session.builder.configs(connection_parameters).create()
@@ -345,7 +346,7 @@ st.markdown("---")
 
 
 # Check if logged-in user is admin
-_current_user = st.session_state.get("username", "").lower()
+_current_user = (st.session_state.get("username") or "").lower()
 is_admin = _current_user == "jeremy"
 is_contributor = _current_user == "jitesh"
 
