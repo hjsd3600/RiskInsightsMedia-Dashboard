@@ -778,10 +778,10 @@ if is_admin and tab4 is not None:
                         index=STATUS_OPTIONS.index(current.get("status", "") or ""
                         ) if (current.get("status", "") or "") in STATUS_OPTIONS else 0
                     )
-                    upd_employees = st.number_input(
+                    upd_employees = st.text_input(
                         "Employee Count",
-                        min_value=0, step=1,
-                        value=int(current.get("employee_count", 0) or 0)
+                        value=str(current.get("employee_count", "") or ""),
+                        placeholder="e.g. 50, 200-500"
                     )
 
 
@@ -797,7 +797,7 @@ if is_admin and tab4 is not None:
                                     linkedin_url   = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
                                     category_group = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
                                     status         = {repr(upd_status) if upd_status else 'NULL'},
-                                    employee_count = {int(upd_employees) if upd_employees else 'NULL'}
+                                    employee_count = {repr(upd_employees.strip()) if upd_employees.strip() else 'NULL'}
                                 WHERE company_id = {repr(str(cid))}
                             """).collect()
                             st.success(f"✅ Company '{upd_name}' updated successfully!")
