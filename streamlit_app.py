@@ -199,11 +199,38 @@ def get_last_updated(_session):
 # ============================================================
 # Table viewer (Hides IDs + Renames Columns + No Download)
 # ============================================================
+def _clean_url(url):
+    """Strip protocol and www for clean display while keeping the full URL for linking."""
+    if url is None or pd.isna(url):
+        return None
+    s = str(url).strip()
+    if not s:
+        return None
+    # Ensure full URL has protocol (for linking)
+    full = s if s.startswith(("http://", "https://")) else "https://" + s
+    # Clean display: strip https://, http://, www.
+    display = s.replace("https://", "").replace("http://", "")
+    if display.startswith("www."):
+        display = display[4:]
+    return full  # store full URL but display column shows clean version
+
+
+def _display_url(url):
+    """Return clean display text for a URL (no protocol or www)."""
+    if url is None or pd.isna(url):
+        return ""
+    s = str(url).strip()
+    s = s.replace("https://", "").replace("http://", "")
+    if s.startswith("www."):
+        s = s[4:]
+    return s
+
+
 def display_table(df: pd.DataFrame, table_name: str):
 
     # Hide ID columns + technical columns
     df = df.drop(
-        columns=["company_id", "round_id", "created_at", "updated_at", "created_at_dt"],
+        columns=["company_id", "round_id", "created_at", "created_at_dt"],
         errors="ignore"
     ).copy()
 
@@ -215,13 +242,30 @@ def display_table(df: pd.DataFrame, table_name: str):
         "lead_investor": "Lead Investor",
         "website_url": "Website",
         "linkedin_url": "LinkedIn",
-        "EMPLOYEE_COUNT": "employee_count"
+        "category_group": "Market Segment",
+        "status": "Status",
+        "employee_count": "Employee Count",
+        "updated_at": "Last Edited At",
+        "updated_by": "Last Edited By",
     }
 
     df.rename(
         columns={k: v for k, v in rename_map.items() if k in df.columns},
         inplace=True
     )
+
+    # Build column config for URL columns (clean display text + clickable)
+    col_config = {}
+    if "Website" in df.columns:
+        col_config["Website"] = st.column_config.LinkColumn(
+            "Website",
+            display_text=r"https?://(?:www\.)?(.+)"
+        )
+    if "LinkedIn" in df.columns:
+        col_config["LinkedIn"] = st.column_config.LinkColumn(
+            "LinkedIn",
+            display_text=r"https?://(?:www\.)?(.+)"
+        )
 
     # Search field
     search_term = st.text_input(
@@ -244,7 +288,7 @@ def display_table(df: pd.DataFrame, table_name: str):
         st.caption(f"{len(view_df)} rows")
 
     # Show table (no download button)
-    st.dataframe(view_df, width="stretch", hide_index=True)
+    st.dataframe(view_df, width="stretch", hide_index=True, column_config=col_config)
 
 
 # ============================================================
@@ -276,7 +320,7 @@ selected_investors = st.sidebar.multiselect("Lead Investor", investor_options)
 
 category_options = sorted(merged_df["category_group"].dropna().astype(str).unique()) \
     if "category_group" in merged_df.columns else []
-selected_categories = st.sidebar.multiselect("Company Category", category_options)
+selected_categories = st.sidebar.multiselect("Market Segment", category_options)
 
 status_options = sorted(merged_df["status"].dropna().astype(str).unique()) \
     if "status" in merged_df.columns else []
@@ -462,7 +506,7 @@ with tab3:
 
             detail_list = []
             if "category_group" in row and pd.notna(row["category_group"]):
-                detail_list.append(f"Category: {row['category_group']}")
+                detail_list.append(f"Market Segment: {row['category_group']}")
             if "status" in row and pd.notna(row["status"]):
                 detail_list.append(f"Status: {row['status']}")
 
@@ -648,7 +692,7 @@ if is_admin and tab4 is not None:
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 (COMPANY_ID, COMPANY_NAME, WEBSITE, LINKEDIN_URL,
                                  CATEGORY_GROUP, STATUS, EMPLOYEE_COUNT,
-                                 CREATED_AT, UPDATED_AT)
+                                 CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY)
                                 VALUES (
                                     {_q(new_company_id)},
                                     {_q(new_name.strip())},
@@ -658,7 +702,9 @@ if is_admin and tab4 is not None:
                                     {_q(new_status)},
                                     {_q(new_employees.strip())},
                                     TO_TIMESTAMP_NTZ({_q(now_str)}),
-                                    TO_TIMESTAMP_NTZ({_q(now_str)})
+                                    TO_TIMESTAMP_NTZ({_q(now_str)}),
+                                    {_q(_current_user)},
+                                    {_q(_current_user)}
                                 )
                             """
                             session.sql(sql).collect()
@@ -790,6 +836,7 @@ if is_admin and tab4 is not None:
                     if submitted2:
                         try:
                             session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            now_upd = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                             session.sql(f"""
                                 UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 SET
@@ -798,7 +845,9 @@ if is_admin and tab4 is not None:
                                     linkedin_url   = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
                                     category_group = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
                                     status         = {repr(upd_status) if upd_status else 'NULL'},
-                                    employee_count = {repr(upd_employees.strip()) if upd_employees.strip() else 'NULL'}
+                                    employee_count = {repr(upd_employees.strip()) if upd_employees.strip() else 'NULL'},
+                                    updated_at     = TO_TIMESTAMP_NTZ('{now_upd}'),
+                                    updated_by     = {repr(_current_user)}
                                 WHERE company_id = {repr(str(cid))}
                             """).collect()
                             st.success(f"✅ Company '{upd_name}' updated successfully!")
@@ -840,7 +889,7 @@ if is_admin and tab4 is not None:
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
                                 (company_id, company_name, stage_or_funding_round,
                                  amount_raised_total, lead_investor, website_url, linkedin_url,
-                                 created_at, updated_at)
+                                 created_at, updated_at, created_by, updated_by)
                                 VALUES
                                 ({repr(str(cid2))},
                                  {repr(fr_company)},
@@ -849,7 +898,7 @@ if is_admin and tab4 is not None:
                                  {repr(fr_investor.strip()) if fr_investor.strip() else 'NULL'},
                                  {repr(fr_website.strip()) if fr_website.strip() else 'NULL'},
                                  {repr(fr_linkedin.strip()) if fr_linkedin.strip() else 'NULL'},
-                                 '{now}', '{now}')
+                                 '{now}', '{now}', {repr(_current_user)}, {repr(_current_user)})
                             """).collect()
                             st.success(f"✅ Funding round logged for '{fr_company}'!")
                             st.cache_data.clear()
