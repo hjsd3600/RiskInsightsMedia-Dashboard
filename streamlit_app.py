@@ -680,7 +680,7 @@ if is_admin and tab4 is not None:
                 new_linkedin    = st.text_input("LinkedIn URL", placeholder="e.g. https://linkedin.com/company/acme")
                 new_segment     = st.selectbox("Market Segment", MARKET_SEGMENTS)
                 new_category    = st.selectbox("Product Category", CATEGORIES)
-                new_status      = st.selectbox("Status", ["", "Active", "Acquired", "Closed", "IPO", "Unknown"])
+                new_status      = st.selectbox("Status", ["", "Private", "Acquired", "Closed", "IPO", "Unknown"])
 
                 MIN_TO_MAX = {
                     None: None,
@@ -831,7 +831,7 @@ if is_admin and tab4 is not None:
                     "Web Application and API Protection (WAAP)", "Wireless Security",
                     "Zero Trust Edge Solutions (ZTE)", "Zero Trust Network Access (ZTNA)",
                 ]
-                STATUS_OPTIONS = ["", "Active", "Acquired", "Closed", "IPO", "Unknown"]
+                STATUS_OPTIONS = ["", "Private", "Acquired", "Closed", "IPO", "Unknown"]
 
                 with st.form("update_company_form"):
                     upd_name = st.text_input("Company Name", value=str(current.get("company_name", "") or ""))
