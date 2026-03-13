@@ -871,8 +871,13 @@ if is_admin and tab4 is not None:
                     }
                     MIN_OPTIONS_UPD = ["", 1, 11, 51, 201, 501, 1001, 5001, 10001]
                     MIN_LABELS_UPD  = ["", "1", "11", "51", "201", "501", "1,001", "5,001", "10,001+"]
-                    cur_min = current.get("employee_count_min")
-                    cur_min_label = str(int(cur_min)) if cur_min is not None and str(cur_min).strip() not in ("", "None") else ""
+                    cur_min_raw = current.get("employee_count_min")
+                    # Safely handle NaN/None from Snowflake — int(NaN) would crash the form
+                    try:
+                        cur_min = int(cur_min_raw) if cur_min_raw is not None and str(cur_min_raw).strip() not in ("", "None", "nan") else None
+                    except (ValueError, TypeError):
+                        cur_min = None
+                    cur_min_label = str(cur_min) if cur_min is not None else ""
                     if cur_min_label == "10001":
                         cur_min_label = "10,001+"
                     elif cur_min_label in ["1001","5001"]:
@@ -883,8 +888,11 @@ if is_admin and tab4 is not None:
                         index=MIN_LABELS_UPD.index(cur_min_label) if cur_min_label in MIN_LABELS_UPD else 0
                     )
                     cur_max = str(current.get("employee_count_max") or "")
-                    # Pre-fill exact box if min==max (was entered as exact)
-                    cur_exact = cur_max if (cur_max and cur_max == str(int(cur_min) if cur_min else "")) else ""
+                    # Pre-fill exact box only if min==max (was entered as exact)
+                    try:
+                        cur_exact = cur_max if (cur_max and cur_min is not None and cur_max == str(cur_min)) else ""
+                    except Exception:
+                        cur_exact = ""
                     upd_emp_exact = st.text_input(
                         "Or enter exact number (overrides range)",
                         value=cur_exact,
@@ -897,6 +905,7 @@ if is_admin and tab4 is not None:
                     else:
                         upd_emp_min = MIN_OPTIONS_UPD[MIN_LABELS_UPD.index(upd_emp_min_label)] if upd_emp_min_label else None
                         upd_emp_max = MIN_TO_MAX_UPD.get(upd_emp_min)
+
 
 
                     submitted2 = st.form_submit_button("Save Changes ✅")
