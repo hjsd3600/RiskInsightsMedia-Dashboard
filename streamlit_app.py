@@ -243,6 +243,7 @@ def display_table(df: pd.DataFrame, table_name: str):
         "website_url": "Website",
         "linkedin_url": "LinkedIn",
         "category_group": "Market Segment",
+        "subcategory": "Product Category",
         "status": "Status",
         "employee_count_min": "Min Employee Count",
         "employee_count_max": "Max Employee Count",
@@ -673,7 +674,7 @@ if is_admin and tab4 is not None:
                 new_website     = st.text_input("Website", placeholder="e.g. https://acme.com")
                 new_linkedin    = st.text_input("LinkedIn URL", placeholder="e.g. https://linkedin.com/company/acme")
                 new_segment     = st.selectbox("Market Segment", MARKET_SEGMENTS)
-                new_category    = st.selectbox("Category", CATEGORIES)
+                new_category    = st.selectbox("Product Category", CATEGORIES)
                 new_status      = st.selectbox("Status", ["", "Active", "Acquired", "Closed", "IPO", "Unknown"])
 
                 MIN_TO_MAX = {
@@ -706,7 +707,7 @@ if is_admin and tab4 is not None:
                             sql = f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 (COMPANY_ID, COMPANY_NAME, WEBSITE, LINKEDIN_URL,
-                                 CATEGORY_GROUP, STATUS,
+                                 CATEGORY_GROUP, SUBCATEGORY, STATUS,
                                  EMPLOYEE_COUNT_MIN, EMPLOYEE_COUNT_MAX,
                                  CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY)
                                 VALUES (
@@ -714,6 +715,7 @@ if is_admin and tab4 is not None:
                                     {_q(new_name.strip())},
                                     {_q(new_website.strip())},
                                     {_q(new_linkedin.strip())},
+                                    {_q(new_segment)},
                                     {_q(new_category)},
                                     {_q(new_status)},
                                     {'NULL' if new_emp_min is None else str(new_emp_min)},
@@ -829,10 +831,15 @@ if is_admin and tab4 is not None:
                         "Network & Infrastructure Security", "Risk & Compliance",
                         "Security Awareness & Training", "Security Operations", "Security Services",
                     ]
-                    upd_segment = st.selectbox("Market Segment", MARKET_SEGMENTS_UPD)
-                    cur_cat = str(current.get("category_group", "") or "")
+                    cur_seg = str(current.get("category_group", "") or "")
+                    upd_segment = st.selectbox(
+                        "Market Segment",
+                        MARKET_SEGMENTS_UPD,
+                        index=MARKET_SEGMENTS_UPD.index(cur_seg) if cur_seg in MARKET_SEGMENTS_UPD else 0
+                    )
+                    cur_cat = str(current.get("subcategory", "") or "")
                     upd_category = st.selectbox(
-                        "Category",
+                        "Product Category",
                         CATEGORIES,
                         index=CATEGORIES.index(cur_cat) if cur_cat in CATEGORIES else 0
                     )
@@ -877,7 +884,8 @@ if is_admin and tab4 is not None:
                                     company_name        = {repr(upd_name.strip())},
                                     website             = {repr(upd_website.strip()) if upd_website.strip() else 'NULL'},
                                     linkedin_url        = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
-                                    category_group      = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
+                                    category_group      = {repr(upd_segment.strip()) if upd_segment.strip() else 'NULL'},
+                                    subcategory         = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
                                     status              = {repr(upd_status) if upd_status else 'NULL'},
                                     employee_count_min  = {'NULL' if upd_emp_min is None else str(upd_emp_min)},
                                     employee_count_max  = {'NULL' if upd_emp_max is None else str(upd_emp_max)},
