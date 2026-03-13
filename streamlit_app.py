@@ -554,10 +554,17 @@ st.markdown("---")
 st.subheader("Data Tables")
 
 allowed_round_ids = filtered["round_id"].dropna().unique() if "round_id" in filtered.columns else []
-allowed_company_ids = filtered["company_id"].dropna().unique() if "company_id" in filtered.columns else []
 
 funding_filtered = funding_df[funding_df["round_id"].isin(allowed_round_ids)]
-companies_filtered = companies_df[companies_df["company_id"].isin(allowed_company_ids)]
+
+# Companies table: filter directly from companies_df so companies with no
+# funding rounds are still visible (they'd be excluded if we used allowed_company_ids)
+companies_filtered = companies_df.copy()
+if selected_categories and "category_group" in companies_filtered.columns:
+    companies_filtered = companies_filtered[companies_filtered["category_group"].isin(selected_categories)]
+if selected_status and "status" in companies_filtered.columns:
+    companies_filtered = companies_filtered[companies_filtered["status"].isin(selected_status)]
+
 
 if selected_table == "Both Tables":
     st.markdown("### Funding Rounds Table")
