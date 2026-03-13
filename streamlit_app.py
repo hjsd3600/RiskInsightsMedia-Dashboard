@@ -231,13 +231,14 @@ def _display_url(url):
     return s
 
 
-def display_table(df: pd.DataFrame, table_name: str):
+def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
 
     # Hide ID columns + technical columns
-    df = df.drop(
-        columns=["company_id", "round_id", "created_at", "created_at_dt"],
-        errors="ignore"
-    ).copy()
+    drop_cols = ["company_id", "round_id", "created_at", "created_at_dt"]
+    if not is_admin:
+        drop_cols += ["updated_at", "updated_by"]
+    df = df.drop(columns=drop_cols, errors="ignore").copy()
+
 
     # Rename columns for display only
     rename_map = {
@@ -559,16 +560,16 @@ companies_filtered = companies_df[companies_df["company_id"].isin(allowed_compan
 
 if selected_table == "Both Tables":
     st.markdown("### Funding Rounds Table")
-    display_table(funding_filtered, "funding_rounds")
+    display_table(funding_filtered, "funding_rounds", is_admin=is_admin)
 
     st.markdown("### Companies Table")
-    display_table(companies_filtered, "companies")
+    display_table(companies_filtered, "companies", is_admin=is_admin)
 
 elif selected_table == "funding_rounds":
-    display_table(funding_filtered, "funding_rounds")
+    display_table(funding_filtered, "funding_rounds", is_admin=is_admin)
 
 elif selected_table == "companies":
-    display_table(companies_filtered, "companies")
+    display_table(companies_filtered, "companies", is_admin=is_admin)
 
 st.caption("Dashboard loads live data from Snowflake.")
 
