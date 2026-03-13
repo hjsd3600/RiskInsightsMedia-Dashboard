@@ -244,7 +244,8 @@ def display_table(df: pd.DataFrame, table_name: str):
         "linkedin_url": "LinkedIn",
         "category_group": "Market Segment",
         "status": "Status",
-        "employee_count": "Employee Count",
+        "employee_count_min": "Min Employee Count",
+        "employee_count_max": "Max Employee Count",
         "updated_at": "Last Edited At",
         "updated_by": "Last Edited By",
     }
@@ -256,12 +257,16 @@ def display_table(df: pd.DataFrame, table_name: str):
 
     # Build column config for URL columns (clean display text + clickable)
     col_config = {}
+
+    # Ensure URLs have protocol so LinkColumn makes them clickable
     if "Website" in df.columns:
+        df["Website"] = df["Website"].apply(format_url)
         col_config["Website"] = st.column_config.LinkColumn(
             "Website",
             display_text=r"https?://(?:www\.)?(.+)"
         )
     if "LinkedIn" in df.columns:
+        df["LinkedIn"] = df["LinkedIn"].apply(format_url)
         col_config["LinkedIn"] = st.column_config.LinkColumn(
             "LinkedIn",
             display_text=r"https?://(?:www\.)?(.+)"
@@ -670,7 +675,17 @@ if is_admin and tab4 is not None:
                 new_segment     = st.selectbox("Market Segment", MARKET_SEGMENTS)
                 new_category    = st.selectbox("Category", CATEGORIES)
                 new_status      = st.selectbox("Status", ["", "Active", "Acquired", "Closed", "IPO", "Unknown"])
-                new_employees   = st.text_input("Employee Count", placeholder="e.g. 50, 200-500")
+
+                MIN_TO_MAX = {
+                    None: None,
+                    1: 10, 11: 50, 51: 200, 201: 500,
+                    501: 1000, 1001: 5000, 5001: 10000, 10001: None
+                }
+                MIN_OPTIONS = ["", 1, 11, 51, 201, 501, 1001, 5001, 10001]
+                MIN_LABELS  = ["", "1", "11", "51", "201", "501", "1,001", "5,001", "10,001+"]
+                new_emp_min_label = st.selectbox("Min Employee Count", MIN_LABELS)
+                new_emp_min = MIN_OPTIONS[MIN_LABELS.index(new_emp_min_label)] if new_emp_min_label else None
+                new_emp_max = MIN_TO_MAX.get(new_emp_min)
 
                 submitted = st.form_submit_button("Add Company ✅")
                 if submitted:
@@ -691,7 +706,8 @@ if is_admin and tab4 is not None:
                             sql = f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 (COMPANY_ID, COMPANY_NAME, WEBSITE, LINKEDIN_URL,
-                                 CATEGORY_GROUP, STATUS, EMPLOYEE_COUNT,
+                                 CATEGORY_GROUP, STATUS,
+                                 EMPLOYEE_COUNT_MIN, EMPLOYEE_COUNT_MAX,
                                  CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY)
                                 VALUES (
                                     {_q(new_company_id)},
@@ -700,7 +716,8 @@ if is_admin and tab4 is not None:
                                     {_q(new_linkedin.strip())},
                                     {_q(new_category)},
                                     {_q(new_status)},
-                                    {_q(new_employees.strip())},
+                                    {'NULL' if new_emp_min is None else str(new_emp_min)},
+                                    {'NULL' if new_emp_max is None else str(new_emp_max)},
                                     TO_TIMESTAMP_NTZ({_q(now_str)}),
                                     TO_TIMESTAMP_NTZ({_q(now_str)}),
                                     {_q(_current_user)},
@@ -825,11 +842,28 @@ if is_admin and tab4 is not None:
                         index=STATUS_OPTIONS.index(current.get("status", "") or ""
                         ) if (current.get("status", "") or "") in STATUS_OPTIONS else 0
                     )
-                    upd_employees = st.text_input(
-                        "Employee Count",
-                        value=str(current.get("employee_count", "") or ""),
-                        placeholder="e.g. 50, 200-500"
+
+                    MIN_TO_MAX_UPD = {
+                        None: None,
+                        1: 10, 11: 50, 51: 200, 201: 500,
+                        501: 1000, 1001: 5000, 5001: 10000, 10001: None
+                    }
+                    MIN_OPTIONS_UPD = ["", 1, 11, 51, 201, 501, 1001, 5001, 10001]
+                    MIN_LABELS_UPD  = ["", "1", "11", "51", "201", "501", "1,001", "5,001", "10,001+"]
+                    cur_min = current.get("employee_count_min")
+                    cur_min_label = str(int(cur_min)) if cur_min is not None and str(cur_min).strip() not in ("", "None") else ""
+                    # Map to display label
+                    if cur_min_label == "10001":
+                        cur_min_label = "10,001+"
+                    elif cur_min_label in ["1001","5001"]:
+                        cur_min_label = f"{int(cur_min_label):,}"
+                    upd_emp_min_label = st.selectbox(
+                        "Min Employee Count",
+                        MIN_LABELS_UPD,
+                        index=MIN_LABELS_UPD.index(cur_min_label) if cur_min_label in MIN_LABELS_UPD else 0
                     )
+                    upd_emp_min = MIN_OPTIONS_UPD[MIN_LABELS_UPD.index(upd_emp_min_label)] if upd_emp_min_label else None
+                    upd_emp_max = MIN_TO_MAX_UPD.get(upd_emp_min)
 
 
                     submitted2 = st.form_submit_button("Save Changes ✅")
@@ -840,14 +874,15 @@ if is_admin and tab4 is not None:
                             session.sql(f"""
                                 UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 SET
-                                    company_name   = {repr(upd_name.strip())},
-                                    website        = {repr(upd_website.strip()) if upd_website.strip() else 'NULL'},
-                                    linkedin_url   = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
-                                    category_group = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
-                                    status         = {repr(upd_status) if upd_status else 'NULL'},
-                                    employee_count = {repr(upd_employees.strip()) if upd_employees.strip() else 'NULL'},
-                                    updated_at     = TO_TIMESTAMP_NTZ('{now_upd}'),
-                                    updated_by     = {repr(_current_user)}
+                                    company_name        = {repr(upd_name.strip())},
+                                    website             = {repr(upd_website.strip()) if upd_website.strip() else 'NULL'},
+                                    linkedin_url        = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
+                                    category_group      = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
+                                    status              = {repr(upd_status) if upd_status else 'NULL'},
+                                    employee_count_min  = {'NULL' if upd_emp_min is None else str(upd_emp_min)},
+                                    employee_count_max  = {'NULL' if upd_emp_max is None else str(upd_emp_max)},
+                                    updated_at          = TO_TIMESTAMP_NTZ('{now_upd}'),
+                                    updated_by          = {repr(_current_user)}
                                 WHERE company_id = {repr(str(cid))}
                             """).collect()
                             st.success(f"✅ Company '{upd_name}' updated successfully!")
@@ -1002,7 +1037,7 @@ if is_contributor and tab4 is not None:
 
                 with st.form("suggest_edit_form"):
                     field_to_edit = st.selectbox("Which field to update?", [
-                        "company_name", "website", "linkedin_url", "category_group", "status", "employee_count"
+                        "company_name", "website", "linkedin_url", "category_group", "status", "employee_count_min"
                     ])
                     old_val = str(c_current.get(field_to_edit, "") or "")
                     st.text_input("Current value (read-only)", value=old_val, disabled=True)
