@@ -123,11 +123,16 @@ def load_data(_session):
         SELECT
             company_id,
             company_name,
-            website      AS website_url,   -- <== IMPORTANT FIX
+            website      AS website_url,
             linkedin_url,
             category_group,
+            subcategory,
             status,
-            employee_count
+            employee_count,
+            employee_count_min,
+            employee_count_max,
+            updated_at,
+            updated_by
         FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
     """).to_pandas()
 
@@ -684,9 +689,16 @@ if is_admin and tab4 is not None:
                 }
                 MIN_OPTIONS = ["", 1, 11, 51, 201, 501, 1001, 5001, 10001]
                 MIN_LABELS  = ["", "1", "11", "51", "201", "501", "1,001", "5,001", "10,001+"]
-                new_emp_min_label = st.selectbox("Min Employee Count", MIN_LABELS)
-                new_emp_min = MIN_OPTIONS[MIN_LABELS.index(new_emp_min_label)] if new_emp_min_label else None
-                new_emp_max = MIN_TO_MAX.get(new_emp_min)
+                new_emp_min_label = st.selectbox("Min Employee Count (range)", MIN_LABELS)
+                new_emp_exact = st.text_input("Or enter exact number (overrides range)", placeholder="e.g. 250")
+
+                # Determine final min/max
+                if new_emp_exact.strip().isdigit():
+                    new_emp_min = int(new_emp_exact.strip())
+                    new_emp_max = str(new_emp_min)
+                else:
+                    new_emp_min = MIN_OPTIONS[MIN_LABELS.index(new_emp_min_label)] if new_emp_min_label else None
+                    new_emp_max = MIN_TO_MAX.get(new_emp_min)
 
                 submitted = st.form_submit_button("Add Company ✅")
                 if submitted:
@@ -859,18 +871,30 @@ if is_admin and tab4 is not None:
                     MIN_LABELS_UPD  = ["", "1", "11", "51", "201", "501", "1,001", "5,001", "10,001+"]
                     cur_min = current.get("employee_count_min")
                     cur_min_label = str(int(cur_min)) if cur_min is not None and str(cur_min).strip() not in ("", "None") else ""
-                    # Map to display label
                     if cur_min_label == "10001":
                         cur_min_label = "10,001+"
                     elif cur_min_label in ["1001","5001"]:
                         cur_min_label = f"{int(cur_min_label):,}"
                     upd_emp_min_label = st.selectbox(
-                        "Min Employee Count",
+                        "Min Employee Count (range)",
                         MIN_LABELS_UPD,
                         index=MIN_LABELS_UPD.index(cur_min_label) if cur_min_label in MIN_LABELS_UPD else 0
                     )
-                    upd_emp_min = MIN_OPTIONS_UPD[MIN_LABELS_UPD.index(upd_emp_min_label)] if upd_emp_min_label else None
-                    upd_emp_max = MIN_TO_MAX_UPD.get(upd_emp_min)
+                    cur_max = str(current.get("employee_count_max") or "")
+                    # Pre-fill exact box if min==max (was entered as exact)
+                    cur_exact = cur_max if (cur_max and cur_max == str(int(cur_min) if cur_min else "")) else ""
+                    upd_emp_exact = st.text_input(
+                        "Or enter exact number (overrides range)",
+                        value=cur_exact,
+                        placeholder="e.g. 250"
+                    )
+                    # Determine final min/max
+                    if upd_emp_exact.strip().isdigit():
+                        upd_emp_min = int(upd_emp_exact.strip())
+                        upd_emp_max = str(upd_emp_min)
+                    else:
+                        upd_emp_min = MIN_OPTIONS_UPD[MIN_LABELS_UPD.index(upd_emp_min_label)] if upd_emp_min_label else None
+                        upd_emp_max = MIN_TO_MAX_UPD.get(upd_emp_min)
 
 
                     submitted2 = st.form_submit_button("Save Changes ✅")
