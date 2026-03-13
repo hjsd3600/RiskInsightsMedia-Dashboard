@@ -403,6 +403,7 @@ st.markdown("---")
 
 # Check if logged-in user is admin
 _current_user = (st.session_state.get("username") or "").lower()
+_current_user_display = (st.session_state.get("name") or _current_user)  # Full name for DB writes
 is_admin = _current_user == "jeremy"
 is_contributor = _current_user == "jitesh"
 
@@ -735,8 +736,8 @@ if is_admin and tab4 is not None:
                                     {'NULL' if new_emp_max is None else str(new_emp_max)},
                                     TO_TIMESTAMP_NTZ({_q(now_str)}),
                                     TO_TIMESTAMP_NTZ({_q(now_str)}),
-                                    {_q(_current_user)},
-                                    {_q(_current_user)}
+                                    {_q(_current_user_display)},
+                                    {_q(_current_user_display)}
                                 )
                             """
                             session.sql(sql).collect()
@@ -915,7 +916,7 @@ if is_admin and tab4 is not None:
                                     employee_count_min  = {'NULL' if upd_emp_min is None else str(upd_emp_min)},
                                     employee_count_max  = {'NULL' if upd_emp_max is None else str(upd_emp_max)},
                                     updated_at          = TO_TIMESTAMP_NTZ('{now_upd}'),
-                                    updated_by          = {repr(_current_user)}
+                                    updated_by          = {repr(_current_user_display)}
                                 WHERE company_id = {repr(str(cid))}
                             """).collect()
                             st.success(f"✅ Company '{upd_name}' updated successfully!")
@@ -966,7 +967,7 @@ if is_admin and tab4 is not None:
                                  {repr(fr_investor.strip()) if fr_investor.strip() else 'NULL'},
                                  {repr(fr_website.strip()) if fr_website.strip() else 'NULL'},
                                  {repr(fr_linkedin.strip()) if fr_linkedin.strip() else 'NULL'},
-                                 '{now}', '{now}', {repr(_current_user)}, {repr(_current_user)})
+                                 '{now}', '{now}', {repr(_current_user_display)}, {repr(_current_user_display)})
                             """).collect()
                             st.success(f"✅ Funding round logged for '{fr_company}'!")
                             st.cache_data.clear()
