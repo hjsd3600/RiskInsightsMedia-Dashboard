@@ -509,8 +509,12 @@ with tab3:
         .reset_index()
     )
 
-    company_metrics = company_metrics.sort_values(by="total_funding", ascending=False)
-    top_companies = company_metrics.head(25)
+    # Sort and search for Company Explorer
+    company_search = st.text_input("🔍 Search companies", placeholder="Type a company name...", key="company_explorer_search")
+    company_metrics = company_metrics.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
+    if company_search.strip():
+        company_metrics = company_metrics[company_metrics["company_name"].str.contains(company_search.strip(), case=False, na=False)]
+    top_companies = company_metrics
 
     for _, row in top_companies.iterrows():
         with st.container(border=True):
@@ -564,6 +568,9 @@ if selected_categories and "category_group" in companies_filtered.columns:
     companies_filtered = companies_filtered[companies_filtered["category_group"].isin(selected_categories)]
 if selected_status and "status" in companies_filtered.columns:
     companies_filtered = companies_filtered[companies_filtered["status"].isin(selected_status)]
+# Sort alphabetically
+if "company_name" in companies_filtered.columns:
+    companies_filtered = companies_filtered.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
 
 
 if selected_table == "Both Tables":
@@ -761,6 +768,7 @@ if is_admin and tab4 is not None:
         with admin_tab2:
             st.markdown("#### Update an Existing Company")
             company_options = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            company_options = company_options.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
             company_map = dict(zip(company_options["company_name"], company_options["company_id"]))
 
             selected_company = st.selectbox(
