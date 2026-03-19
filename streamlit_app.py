@@ -955,7 +955,9 @@ if is_admin and tab4 is not None:
         with admin_tab3:
             st.markdown("#### Log a New Funding Round")
             company_options2 = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            company_options2 = company_options2.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
             company_map2 = dict(zip(company_options2["company_name"], company_options2["company_id"]))
+
 
             with st.form("add_funding_form"):
                 fr_company = st.selectbox(
