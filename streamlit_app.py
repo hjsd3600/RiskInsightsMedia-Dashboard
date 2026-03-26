@@ -315,6 +315,21 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
     st.dataframe(view_df, width="stretch", hide_index=True, column_config=col_config)
 
 
+@st.fragment
+def show_data_tables(funding_df_frag, companies_df_frag, is_admin_frag, selected_table_frag):
+    """Isolated fragment so company search only re-runs this section, not the full app."""
+    if selected_table_frag == "Both Tables":
+        st.markdown("### Funding Rounds Table")
+        display_table(funding_df_frag, "funding_rounds", is_admin=is_admin_frag)
+        st.markdown("### Companies Table")
+        display_table(companies_df_frag, "companies", is_admin=is_admin_frag)
+    elif selected_table_frag == "funding_rounds":
+        display_table(funding_df_frag, "funding_rounds", is_admin=is_admin_frag)
+    elif selected_table_frag == "companies":
+        display_table(companies_df_frag, "companies", is_admin=is_admin_frag)
+    st.caption("Dashboard loads live data from Snowflake.")
+
+
 # ============================================================
 # PAGE CONFIG
 # ============================================================
@@ -585,20 +600,8 @@ if "company_name" in companies_filtered.columns:
     companies_filtered = companies_filtered.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
 
 
-if selected_table == "Both Tables":
-    st.markdown("### Funding Rounds Table")
-    display_table(funding_filtered, "funding_rounds", is_admin=is_admin)
+show_data_tables(funding_filtered, companies_filtered, is_admin, selected_table)
 
-    st.markdown("### Companies Table")
-    display_table(companies_filtered, "companies", is_admin=is_admin)
-
-elif selected_table == "funding_rounds":
-    display_table(funding_filtered, "funding_rounds", is_admin=is_admin)
-
-elif selected_table == "companies":
-    display_table(companies_filtered, "companies", is_admin=is_admin)
-
-st.caption("Dashboard loads live data from Snowflake.")
 
 
 # ============================================================
