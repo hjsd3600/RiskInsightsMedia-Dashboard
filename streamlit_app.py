@@ -279,25 +279,37 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
             display_text=r"https?://(?:www\.)?(.+)"
         )
 
-    # Search field
-    search_term = st.text_input(
-        f"Search in {table_name}:",
-        placeholder="Type to search...",
-        key=f"search_{table_name}"
-    )
-
-    if search_term:
-        string_cols = df.select_dtypes(include="object").columns
-        mask = (
-            df[string_cols].astype(str)
-            .apply(lambda col: col.str.contains(search_term, case=False, na=False))
-            .any(axis=1)
+    # Search field — use fast selectbox for company tables, text_input for others
+    if "Company" in df.columns:
+        company_names = [""] + sorted(df["Company"].dropna().astype(str).unique().tolist())
+        selected_company_filter = st.selectbox(
+            "Search / filter by company:",
+            options=company_names,
+            key=f"search_{table_name}"
         )
-        view_df = df[mask]
-        st.caption(f"{len(view_df)} matching rows")
-    else:
-        view_df = df
+        if selected_company_filter:
+            view_df = df[df["Company"] == selected_company_filter]
+        else:
+            view_df = df
         st.caption(f"{len(view_df)} rows")
+    else:
+        search_term = st.text_input(
+            f"Search in {table_name}:",
+            placeholder="Type to search...",
+            key=f"search_{table_name}"
+        )
+        if search_term:
+            string_cols = df.select_dtypes(include="object").columns
+            mask = (
+                df[string_cols].astype(str)
+                .apply(lambda col: col.str.contains(search_term, case=False, na=False))
+                .any(axis=1)
+            )
+            view_df = df[mask]
+            st.caption(f"{len(view_df)} matching rows")
+        else:
+            view_df = df
+            st.caption(f"{len(view_df)} rows")
 
     # Show table (no download button)
     st.dataframe(view_df, width="stretch", hide_index=True, column_config=col_config)
@@ -958,6 +970,27 @@ if is_admin and tab4 is not None:
             company_options2 = company_options2.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
             company_map2 = dict(zip(company_options2["company_name"], company_options2["company_id"]))
 
+            FUNDING_STAGES = [
+                "", "Pre-Seed", "Grant", "Seed", "Venture Round",
+                "A", "A1", "B", "B1", "C", "C1", "D", "D1",
+                "E", "E1", "F", "F1", "G", "G1", "H", "H1",
+                "I", "I1", "J", "J1",
+                "Private Equity Round", "Debt Financing", "Post-IPO Debt Round",
+            ]
+
+            CURRENCY_MAP = {
+                "USD ($)": "$",   "EUR (€)": "\u20ac",  "GBP (£)": "\u00a3",
+                "JPY (¥)": "\u00a5",  "INR (₹)": "\u20b9", "ILS (₪)": "\u20aa",
+                "AUD (A$)": "A$", "CAD (C$)": "C$",  "CHF": "CHF",
+                "CNY (¥)": "\u00a5", "HKD (HK$)": "HK$", "SGD (S$)": "S$",
+                "NZD (NZ$)": "NZ$",
+            }
+            MULTIPLIER_MAP = {
+                "Exact": 1,
+                "K (×1,000)": 1_000,
+                "M (×1,000,000)": 1_000_000,
+                "B (×1,000,000,000)": 1_000_000_000,
+            }
 
             with st.form("add_funding_form"):
                 fr_company = st.selectbox(
@@ -965,34 +998,55 @@ if is_admin and tab4 is not None:
                     options=[""] + list(company_map2.keys()),
                     key="funding_company_select"
                 )
-                fr_stage = st.text_input("Funding Stage / Round *", placeholder="e.g. Series A, Seed")
-                fr_amount = st.text_input("Amount Raised", placeholder="e.g. 5M, 1.2B")
+                fr_stage = st.selectbox("Funding Stage / Round *", FUNDING_STAGES)
                 fr_investor = st.text_input("Lead Investor", placeholder="e.g. Sequoia Capital")
-                fr_website = st.text_input("Website", placeholder="e.g. https://company.com")
-                fr_linkedin = st.text_input("LinkedIn URL", placeholder="e.g. https://linkedin.com/company/x")
+
+                st.markdown("**Amount Raised**")
+                amt_col1, amt_col2, amt_col3 = st.columns([2, 3, 2])
+                with amt_col1:
+                    fr_currency_label = st.selectbox("Currency", list(CURRENCY_MAP.keys()))
+                with amt_col2:
+                    fr_amount_raw = st.number_input("Amount", min_value=0.0, step=1.0, format="%.0f")
+                with amt_col3:
+                    fr_multiplier_label = st.selectbox("Scale", list(MULTIPLIER_MAP.keys()))
+
+                fr_press_release = st.text_input("Press Release URL", placeholder="e.g. https://company.com/press")
 
                 submitted3 = st.form_submit_button("Log Funding Round ✅")
                 if submitted3:
-                    if not fr_company or not fr_stage.strip():
+                    if not fr_company or not fr_stage:
                         st.error("Company and Funding Stage are required.")
                     else:
                         try:
                             session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
                             cid2 = company_map2[fr_company]
                             now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+                            # Build amount string e.g. "$81000000"
+                            symbol = CURRENCY_MAP[fr_currency_label]
+                            multiplier = MULTIPLIER_MAP[fr_multiplier_label]
+                            if fr_amount_raw > 0:
+                                amount_val = f"{symbol}{int(fr_amount_raw * multiplier)}"
+                            else:
+                                amount_val = None
+
+                            def _fq(val):
+                                if val is None or str(val).strip() == "":
+                                    return "NULL"
+                                return "'" + str(val).replace("'", "''") + "'"
+
                             session.sql(f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
                                 (company_id, company_name, stage_or_funding_round,
-                                 amount_raised_total, lead_investor, website_url, linkedin_url,
+                                 amount_raised_total, lead_investor, website_url,
                                  created_at, updated_at, created_by, updated_by)
                                 VALUES
-                                ({repr(str(cid2))},
-                                 {repr(fr_company)},
-                                 {repr(fr_stage.strip())},
-                                 {repr(fr_amount.strip()) if fr_amount.strip() else 'NULL'},
-                                 {repr(fr_investor.strip()) if fr_investor.strip() else 'NULL'},
-                                 {repr(fr_website.strip()) if fr_website.strip() else 'NULL'},
-                                 {repr(fr_linkedin.strip()) if fr_linkedin.strip() else 'NULL'},
+                                ({_fq(str(cid2))},
+                                 {_fq(fr_company)},
+                                 {_fq(fr_stage)},
+                                 {_fq(amount_val)},
+                                 {_fq(fr_investor.strip())},
+                                 {_fq(fr_press_release.strip())},
                                  '{now}', '{now}', {repr(_current_user_display)}, {repr(_current_user_display)})
                             """).collect()
                             st.success(f"✅ Funding round logged for '{fr_company}'!")
