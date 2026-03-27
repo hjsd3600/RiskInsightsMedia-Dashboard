@@ -1061,11 +1061,12 @@ if is_admin and tab4 is not None:
 
                             session.sql(f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
-                                (company_id, company_name, stage_or_funding_round,
+                                (round_id, company_id, company_name, stage_or_funding_round,
                                  amount_raised_total, lead_investor, website_url,
                                  created_at, updated_at, created_by, updated_by)
                                 VALUES
-                                ({_fq(str(cid2))},
+                                (UUID_STRING(),
+                                 {_fq(str(cid2))},
                                  {_fq(fr_company)},
                                  {_fq(fr_stage)},
                                  {_fq(amount_val)},
