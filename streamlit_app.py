@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import streamlit_authenticator as stauth
+import uuid
 
 # Build credentials dictionary safely from secrets
 credentials = {
@@ -1059,13 +1060,14 @@ if is_admin and tab4 is not None:
                                     return "NULL"
                                 return "'" + str(val).replace("'", "''") + "'"
 
+                            new_round_id = str(uuid.uuid4())
                             session.sql(f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
                                 (round_id, company_id, company_name, stage_or_funding_round,
                                  amount_raised_total, lead_investor, website_url,
                                  created_at, updated_at, created_by, updated_by)
                                 VALUES
-                                (UUID_STRING(),
+                                ({_fq(new_round_id)},
                                  {_fq(str(cid2))},
                                  {_fq(fr_company)},
                                  {_fq(fr_stage)},
