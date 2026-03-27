@@ -238,6 +238,28 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
     if not is_admin:
         drop_cols += ["updated_at", "updated_by"]
     df = df.drop(columns=drop_cols, errors="ignore").copy()
+    # Combine min/max employee count into a single formatted range column e.g. "51-200"
+    # Falls back to old free-text employee_count for legacy rows where min/max are NULL
+    if "employee_count_min" in df.columns and "employee_count_max" in df.columns:
+        def _fmt_range(row):
+            lo = row.get("employee_count_min")
+            hi = row.get("employee_count_max")
+            try:
+                lo_i = int(lo) if pd.notna(lo) else None
+                hi_i = int(hi) if pd.notna(hi) else None
+            except (ValueError, TypeError):
+                lo_i, hi_i = None, None
+            if lo_i is not None and hi_i is not None:
+                return f"{lo_i:,}" if lo_i == hi_i else f"{lo_i:,}-{hi_i:,}"
+            if lo_i is not None:
+                return f"{lo_i:,}+"
+            # Fallback: use old free-text column for legacy rows
+            legacy = row.get("employee_count")
+            if legacy and str(legacy).strip() not in ("", "None", "nan"):
+                return str(legacy).strip()
+            return ""
+        df["employee_count_range"] = df.apply(_fmt_range, axis=1)
+        df = df.drop(columns=["employee_count_min", "employee_count_max", "employee_count"], errors="ignore")
 
 
     # Rename columns for display only
@@ -251,8 +273,7 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
         "category_group": "Market Segment",
         "subcategory": "Product Category",
         "status": "Status",
-        "employee_count_min": "Min Employee Count",
-        "employee_count_max": "Max Employee Count",
+        "employee_count_range": "Employee Count",
         "updated_at": "Last Edited At",
         "updated_by": "Last Edited By",
     }
