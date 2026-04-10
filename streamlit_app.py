@@ -546,24 +546,32 @@ with tab2:
 with tab3:
     st.markdown("### Company Explorer")
 
-    group_cols = ["company_id", "company_name", "website_url", "linkedin_url"]
-    if "category_group" in filtered.columns:
-        group_cols.append("category_group")
-    if "status" in filtered.columns:
-        group_cols.append("status")
+    # Build from ALL companies (not just those with funding rounds)
+    explorer_base = companies_df.copy()
+    if selected_categories and "category_group" in explorer_base.columns:
+        explorer_base = explorer_base[explorer_base["category_group"].isin(selected_categories)]
+    if selected_status and "status" in explorer_base.columns:
+        explorer_base = explorer_base[explorer_base["status"].isin(selected_status)]
 
-    company_metrics = (
-        filtered.groupby(group_cols, dropna=False)
-        .agg(total_funding=("amount_num", "sum"))
+    # Get funding totals per company from filtered merged data
+    funding_totals = (
+        filtered.groupby("company_id")["amount_num"]
+        .sum()
         .reset_index()
+        .rename(columns={"amount_num": "total_funding"})
     )
 
-    # Sort and search for Company Explorer
+    # Left join so ALL companies appear, with funding total where available
+    company_metrics = explorer_base.merge(funding_totals, on="company_id", how="left")
+    company_metrics["total_funding"] = company_metrics["total_funding"].fillna(0)
+
+    # Sort and search
     company_search = st.text_input("🔍 Search companies", placeholder="Type a company name...", key="company_explorer_search")
     company_metrics = company_metrics.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
     if company_search.strip():
         company_metrics = company_metrics[company_metrics["company_name"].str.contains(company_search.strip(), case=False, na=False)]
     top_companies = company_metrics
+
 
     for _, row in top_companies.iterrows():
         with st.container(border=True):
