@@ -81,6 +81,29 @@ def format_url(url):
     return url
 
 
+def format_compact_amount(num, symbol="$"):
+    """Format a number as compact currency: $28M, $1.5B, $500K."""
+    try:
+        num = float(num)
+    except (TypeError, ValueError):
+        return "N/A"
+    if pd.isna(num) or num == 0:
+        return "N/A"
+    if num >= 1_000_000_000:
+        val = num / 1_000_000_000
+        scale = "B"
+    elif num >= 1_000_000:
+        val = num / 1_000_000
+        scale = "M"
+    elif num >= 1_000:
+        val = num / 1_000
+        scale = "K"
+    else:
+        return f"{symbol}{int(num)}"
+    formatted = f"{int(val)}" if val == int(val) else f"{val:.1f}"
+    return f"{symbol}{formatted}{scale}"
+
+
 def parse_funding_amount(series: pd.Series) -> pd.Series:
     """Convert textual amount to numeric."""
     import re
@@ -599,13 +622,10 @@ with tab3:
                     st.link_button("LinkedIn", linkedin, width="stretch")
 
             with cols[1]:
-                tf = (
-                    f"${row['total_funding']:,.0f}"
-                    if pd.notna(row["total_funding"])
-                    else "N/A"
-                )
+                tf = format_compact_amount(row.get("total_funding", 0))
                 st.markdown("**Funding Summary**")
                 st.write(f"- Total funding: {tf}")
+
 
 
 # ============================================================
