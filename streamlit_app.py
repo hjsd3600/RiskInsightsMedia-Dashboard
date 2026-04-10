@@ -20,7 +20,7 @@ authenticator = stauth.Authenticate(
     credentials,
     st.secrets["cookie"]["name"],
     st.secrets["cookie"]["key"],
-    st.secrets["cookie"]["expiry_days"],
+    30,          # 30-day session — prevents logout mid-edit
     auto_hash=False,
 )
 
