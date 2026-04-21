@@ -1,0 +1,1133 @@
+
+[     UTC     ] Logs for riskinsightsmedia-dashboard.streamlit.app/
+────────────────────────────────────────────────────────────────────────────────────────
+[21:53:57] 🚀 Starting up repository: 'riskinsightsmedia-dashboard', branch: 'main', main module: 'streamlit_app.py'
+[21:53:57] 🐙 Cloning repository...
+[21:53:57] 🐙 Cloning into '/mount/src/riskinsightsmedia-dashboard'...
+
+[21:53:57] 🐙 Cloned repository!
+[21:53:57] 🐙 Pulling code changes from Github...
+[21:53:58] 📦 Processing dependencies...
+
+──────────────────────────────────────── uv ───────────────────────────────────────────
+
+Using uv pip install.
+Using Python 3.13.12 environment at /home/adminuser/venv
+Resolved 62 packages in 736ms
+Prepared 62 packages[2026-02-23 21:54:01.952592]  in 2.76s
+Installed 62 packages in 196ms
+ + altair==6.0.0
+ + asn1crypto==1.5.1
+ + attrs==25.4.0
+ + bcrypt==5.0.0
+ + blinker==1.9.0
+ + boto3==1.42.55
+ + botocore==1.42.55
+ + cachetools==6.2.6
+ + captcha==0.7.1
+ + certifi==2026.1.4
+ + cffi==2.0.0
+ + charset-normalizer==3.4.4
+ + click==8.3.1
+ + cloudpickle==3.1.1
+ + cryptography==46.0.5
+ + extra-streamlit-components==0.1.81
+ + filelock==3.24.3
+ + gitdb==4.0.12
+ + gitpython==3.1.46
+ + [2026-02-23 21:54:02.142684] idna==3.11
+ + jinja2==3.1.6
+ + jmespath==1.1.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + markupsafe==3.0.3
+ + narwhals==2.17.0
+ + numpy==[2026-02-23 21:54:02.143175] 2.4.2
+ + packaging==26.0
+ + pandas==2.3.3
+ + pillow==12.1.1
+ + platformdirs==4.9.2
+ + protobuf==6.33.5
+ + pyarrow==23.0.1
+ + pycparser==3.0
+ + pydeck==0.9.1
+ [2026-02-23 21:54:02.143431] + pyjwt==2.11.0
+ + pyopenssl==25.3.0
+ + python-dateutil==2.9.0.post0
+ + pytz==2025.2
+ + pyyaml==6.0.3
+ + referencing==0.37.0
+ + requests==2.32.5
+ + rpds-py[2026-02-23 21:54:02.143603] ==0.30.0
+ + s3transfer==0.16.0
+ + setuptools==82.0.0
+ + six==1.17.0
+ + smmap==5.0.2
+ + snowflake-connector-python==4.3.0
+ + [2026-02-23 21:54:02.143801] snowflake-snowpark-python==1.45.0
+ + sortedcontainers==2.4.0
+ + streamlit==1.54.0
+ + streamlit-authenticator==0.4.2
+ + [2026-02-23 21:54:02.144008] tenacity==9.1.4
+ + toml==0.10.2
+ + tomlkit==0.14.0
+ + tornado==6.5.4
+ + typing-extensions==4.15.0
+ + tzdata==2025.3
+ + tzlocal==5.3.1[2026-02-23 21:54:02.144175] 
+ + urllib3==2.6.3
+ + watchdog==6.0.0
+ + wheel==0.46.3
+Checking if Streamlit is installed
+Found Streamlit version 1.54.0 in the environment
+Installing rich for an improved exception logging
+Using uv pip install.
+Using Python 3.13.12 environment at /home/adminuser/venv
+Resolved 4 packages in 134ms
+Prepared 4 packages in 146ms
+Installed 4 packages in 16ms
+ [2026-02-23 21:54:04.334815] + markdown-it-py==4.0.0
+ + mdurl==0.1.2
+ + pygments==2.19.2
+ + rich==14.3.3
+
+────────────────────────────────────────────────────────────────────────────────────────
+
+[21:54:05] 🐍 Python dependencies were installed from /mount/src/riskinsightsmedia-dashboard/requirements.txt using uv.
+Check if streamlit is installed
+Streamlit is already installed
+[21:54:06] 📦 Processed dependencies!
+
+
+
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:348 in <module>       
+                                                                                
+     345                                                                        
+     346                                                                        
+     347 # Check if logged-in user is admin                                     
+  ❱  348 _current_user = st.session_state.get("username", "").lower()           
+     349 is_admin = _current_user == "jeremy"                                   
+     350 is_contributor = _current_user == "jitesh"                             
+     351                                                                        
+────────────────────────────────────────────────────────────────────────────────
+AttributeError: 'NoneType' object has no attribute 'lower'
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:348 in <module>       
+                                                                                
+     345                                                                        
+     346                                                                        
+     347 # Check if logged-in user is admin                                     
+  ❱  348 _current_user = st.session_state.get("username", "").lower()           
+     349 is_admin = _current_user == "jeremy"                                   
+     350 is_contributor = _current_user == "jitesh"                             
+     351                                                                        
+────────────────────────────────────────────────────────────────────────────────
+AttributeError: 'NoneType' object has no attribute 'lower'
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+2026-02-23 23:05:50.736 Session with id 1b8109a9-53ee-407a-bcd9-8b3c83aa2202 is already connected! Connecting to a new session.
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:784 in <module>       
+                                                                                
+     781 │   │   │   │   │   upd_employees = st.number_input(                   
+     782 │   │   │   │   │   │   "Employee Count",                              
+     783 │   │   │   │   │   │   min_value=0, step=1,                           
+  ❱  784 │   │   │   │   │   │   value=int(current.get("employee_count", 0) or  
+     785 │   │   │   │   │   )                                                  
+     786                                                                        
+     787                                                                        
+────────────────────────────────────────────────────────────────────────────────
+ValueError: invalid literal for int() with base 10: '201–500'
+[02:33:05] 🐙 Pulling code changes from Github...
+[02:33:05] 📦 Processing dependencies...
+[02:33:05] 📦 Processed dependencies!
+[02:33:06] 🔄 Updated app!
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/altair/utils/core.py:264: UserWarning: I don't know how to infer vegalite type from 'empty'.  Defaulting to nominal.
+  warnings.warn(
+/home/adminuser/venv/lib/python3.13/site-packages/jwt/api_jwt.py:153: InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  return self._jws.encode(
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:258 in <module>       
+                                                                                
+     255 st.caption("Explore funding rounds, investors, categories, and compan  
+     256                                                                        
+     257 session = get_session()                                                
+  ❱  258 companies_df, funding_df, merged_df = load_data(session)               
+     259                                                                        
+     260 if funding_df.empty or companies_df.empty:                             
+     261 │   st.error("No data available in Snowflake.")                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:281 in __call__                                                
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:326 in _get_or_create_cached_value                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:385 in _handle_cache_miss                                      
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:131 in load_data      
+                                                                                
+     128 │   │   │   status,                                                    
+     129 │   │   │   employee_count                                             
+     130 │   │   FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES                  
+  ❱  131 │   """).to_pandas()                                                   
+     132 │                                                                      
+     133 │   # FUNDING_ROUNDS table                                             
+     134 │   funding = _session.sql("""                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/telemetry.py:295 in wrap                                                   
+                                                                                
+    292 │   │   with session.query_history() as query_history:                  
+    293 │   │   │   try:                                                        
+    294 │   │   │   │   with ResourceUsageCollector() as resource_usage_collec  
+  ❱ 295 │   │   │   │   │   result = func(*args, **kwargs)                      
+    296 │   │   │   │   resource_usage = resource_usage_collector.get_resource  
+    297 │   │   │   finally:                                                    
+    298 │   │   │   │   if not session._collect_snowflake_plan_telemetry_at_cr  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/utils.py:1148 in call_wrapper                                              
+                                                                                
+    1145 │   │                                                                  
+    1146 │   │   # TODO: Could modify internal docstring to display that users  
+    1147 │   │                                                                  
+  ❱ 1148 │   │   return func(*args, **kwargs)                                   
+    1149 │                                                                      
+    1150 │   return call_wrapper                                                
+    1151                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/datafra  
+  me.py:1081 in to_pandas                                                       
+                                                                                
+    1078 │   │   │   _, kwargs[DATAFRAME_AST_PARAMETER] = self._session._ast_b  
+    1079 │   │                                                                  
+    1080 │   │   with open_telemetry_context_manager(self.to_pandas, self):     
+  ❱ 1081 │   │   │   result = self._session._conn.execute(                      
+    1082 │   │   │   │   self._plan,                                            
+    1083 │   │   │   │   to_pandas=True,                                        
+    1084 │   │   │   │   block=block,                                           
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:648 in execute                                        
+                                                                                
+    645 │   │   │   raise NotImplementedError(                                  
+    646 │   │   │   │   "Async query is not supported in stored procedure yet"  
+    647 │   │   │   )                                                           
+  ❱ 648 │   │   result_set, result_meta = self.get_result_set(                  
+    649 │   │   │   plan,                                                       
+    650 │   │   │   to_pandas,                                                  
+    651 │   │   │   to_iter,                                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:427 in wrap                                     
+                                                                                
+     424 │   │   │   │   │   ne = SnowparkClientExceptionMessages.SQL_EXCEPTIO  
+     425 │   │   │   │   │   │   e, debug_context=debug_context                 
+     426 │   │   │   │   │   )                                                  
+  ❱  427 │   │   │   │   │   raise ne.with_traceback(tb) from None              
+     428 │   │   │                                                              
+     429 │   │   │   return wrap                                                
+     430                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:180 in wrap                                     
+                                                                                
+     177 │   │   │   │   )                                                      
+     178 │   │   │   │                                                          
+     179 │   │   │   │   try:                                                   
+  ❱  180 │   │   │   │   │   return func(*args, **kwargs)                       
+     181 │   │   │   │   except snowflake.connector.errors.ProgrammingError as  
+     182 │   │   │   │   │   from snowflake.snowpark._internal.analyzer.select  
+     183 │   │   │   │   │   │   Selectable,                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:770 in get_result_set                                 
+                                                                                
+    767 │   │   │   │   │   │   if i == len(main_queries) - 1 and dataframe_as  
+    768 │   │   │   │   │   │   │   kwargs[DATAFRAME_AST_PARAMETER] = datafram  
+    769 │   │   │   │   │   │   is_final_query = i == len(main_queries) - 1     
+  ❱ 770 │   │   │   │   │   │   result = self.run_query(                        
+    771 │   │   │   │   │   │   │   final_query,                                
+    772 │   │   │   │   │   │   │   to_pandas,                                  
+    773 │   │   │   │   │   │   │   to_iter and is_final_query,                 
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:137 in wrap                                           
+                                                                                
+    134 │   │   │   │   │   │   ex.cause                                        
+    135 │   │   │   │   │   )                                                   
+    136 │   │   │   │   except Exception as ex:                                 
+  ❱ 137 │   │   │   │   │   raise ex                                            
+    138 │   │   │                                                               
+    139 │   │   │   return wrap                                                 
+    140                                                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:131 in wrap                                           
+                                                                                
+    128 │   │   │   │   if args[0]._conn.is_closed():                           
+    129 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    130 │   │   │   │   try:                                                    
+  ❱ 131 │   │   │   │   │   return func(*args, **kwargs)                        
+    132 │   │   │   │   except ReauthenticationRequest as ex:                   
+    133 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    134 │   │   │   │   │   │   ex.cause                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:544 in run_query                                      
+                                                                                
+    541 │   │   │   if log_on_exception:                                        
+    542 │   │   │   │   query_id_log = f" [queryID: {ex.sfqid}]" if hasattr(ex  
+    543 │   │   │   │   logger.error(f"Failed to execute query{query_id_log} {  
+  ❱ 544 │   │   │   raise ex                                                    
+    545 │   │                                                                   
+    546 │   │   # fetch_pandas_all/batches() only works for SELECT statements   
+    547 │   │   # We call fetchall() if fetch_pandas_all/batches() fails,       
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:529 in run_query                                      
+                                                                                
+    526 │   │   │   if not is_sql_select_statement(query):                      
+    527 │   │   │   │   cached_analyze_attributes.clear_cache()                 
+    528 │   │   │   if block:                                                   
+  ❱ 529 │   │   │   │   results_cursor = self.execute_and_notify_query_listene  
+    530 │   │   │   │   │   query, params=params, **kwargs                      
+    531 │   │   │   │   )                                                       
+    532 │   │   │   │   logger.debug(f"Execute query [queryID: {results_cursor  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:459 in execute_and_notify_query_listener              
+                                                                                
+    456 │   │   │   self.notify_query_listeners(                                
+    457 │   │   │   │   QueryRecord(sfqid, err_query, False), is_error=True, *  
+    458 │   │   │   )                                                           
+  ❱ 459 │   │   │   raise ex                                                    
+    460 │   │                                                                   
+    461 │   │   notify_kwargs["requestId"] = str(results_cursor._request_id)    
+    462 │   │   self.notify_query_listeners(                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:450 in execute_and_notify_query_listener              
+                                                                                
+    447 │   │   │   if "_PLAN_UUID" in statement_params:                        
+    448 │   │   │   │   notify_kwargs["dataframe_uuid"] = statement_params["_P  
+    449 │   │   try:                                                            
+  ❱ 450 │   │   │   results_cursor = self._cursor.execute(query, **kwargs)      
+    451 │   │   except Exception as ex:                                         
+    452 │   │   │   notify_kwargs["requestId"] = None                           
+    453 │   │   │   notify_kwargs["exception"] = ex                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:1033 in execute                                                           
+                                                                                
+    1030 │   │   │   )                                                          
+    1031 │   │   │   query = query1                                             
+    1032 │   │                                                                  
+  ❱ 1033 │   │   ret = self._execute_helper(query, **kwargs)                    
+    1034 │   │   self._sfqid = (                                                
+    1035 │   │   │   ret["data"]["queryId"]                                     
+    1036 │   │   │   if "data" in ret and "queryId" in ret["data"]              
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:739 in _execute_helper                                                    
+                                                                                
+     736 │   │   │   )                                                          
+     737 │   │   ret: dict[str, Any] = {"data": {}}                             
+     738 │   │   try:                                                           
+  ❱  739 │   │   │   ret = self._connection.cmd_query(                          
+     740 │   │   │   │   query,                                                 
+     741 │   │   │   │   self._sequence_counter,                                
+     742 │   │   │   │   self._request_id,                                      
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/connec  
+  tion.py:1916 in cmd_query                                                     
+                                                                                
+    1913 │   │                                                                  
+    1914 │   │   url_parameters = {REQUEST_ID: request_id}                      
+    1915 │   │                                                                  
+  ❱ 1916 │   │   ret = self.rest.request(                                       
+    1917 │   │   │   "/queries/v1/query-request?" + urlencode(url_parameters),  
+    1918 │   │   │   data,                                                      
+    1919 │   │   │   client=client,                                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:487 in request                                                           
+                                                                                
+     484 │   │   if self._connection.service_name:                              
+     485 │   │   │   headers[HTTP_HEADER_SERVICE_NAME] = self._connection.serv  
+     486 │   │   if method == "post":                                           
+  ❱  487 │   │   │   return self._post_request(                                 
+     488 │   │   │   │   url,                                                   
+     489 │   │   │   │   headers,                                               
+     490 │   │   │   │   json.dumps(body, cls=SnowflakeRestfulJsonEncoder),     
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:782 in _post_request                                                     
+                                                                                
+     779 │   │   │   │   ret = self._renew_session()                            
+     780 │   │   │   except ReauthenticationRequest as ex:                      
+     781 │   │   │   │   if self._connection._authenticator != EXTERNAL_BROWSE  
+  ❱  782 │   │   │   │   │   raise ex.cause                                     
+     783 │   │   │   │   ret = self._connection._reauthenticate()               
+     784 │   │   │   logger.debug(                                              
+     785 │   │   │   │   "ret[code] = {code} after renew_session".format(       
+────────────────────────────────────────────────────────────────────────────────
+SnowparkSQLException: (1304): 390114 (08001): Authentication token has expired. 
+The user must authenticate again.
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:258 in <module>       
+                                                                                
+     255 st.caption("Explore funding rounds, investors, categories, and compan  
+     256                                                                        
+     257 session = get_session()                                                
+  ❱  258 companies_df, funding_df, merged_df = load_data(session)               
+     259                                                                        
+     260 if funding_df.empty or companies_df.empty:                             
+     261 │   st.error("No data available in Snowflake.")                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:281 in __call__                                                
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:326 in _get_or_create_cached_value                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:385 in _handle_cache_miss                                      
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:131 in load_data      
+                                                                                
+     128 │   │   │   status,                                                    
+     129 │   │   │   employee_count                                             
+     130 │   │   FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES                  
+  ❱  131 │   """).to_pandas()                                                   
+     132 │                                                                      
+     133 │   # FUNDING_ROUNDS table                                             
+     134 │   funding = _session.sql("""                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/telemetry.py:295 in wrap                                                   
+                                                                                
+    292 │   │   with session.query_history() as query_history:                  
+    293 │   │   │   try:                                                        
+    294 │   │   │   │   with ResourceUsageCollector() as resource_usage_collec  
+  ❱ 295 │   │   │   │   │   result = func(*args, **kwargs)                      
+    296 │   │   │   │   resource_usage = resource_usage_collector.get_resource  
+    297 │   │   │   finally:                                                    
+    298 │   │   │   │   if not session._collect_snowflake_plan_telemetry_at_cr  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/utils.py:1148 in call_wrapper                                              
+                                                                                
+    1145 │   │                                                                  
+    1146 │   │   # TODO: Could modify internal docstring to display that users  
+    1147 │   │                                                                  
+  ❱ 1148 │   │   return func(*args, **kwargs)                                   
+    1149 │                                                                      
+    1150 │   return call_wrapper                                                
+    1151                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/datafra  
+  me.py:1081 in to_pandas                                                       
+                                                                                
+    1078 │   │   │   _, kwargs[DATAFRAME_AST_PARAMETER] = self._session._ast_b  
+    1079 │   │                                                                  
+    1080 │   │   with open_telemetry_context_manager(self.to_pandas, self):     
+  ❱ 1081 │   │   │   result = self._session._conn.execute(                      
+    1082 │   │   │   │   self._plan,                                            
+    1083 │   │   │   │   to_pandas=True,                                        
+    1084 │   │   │   │   block=block,                                           
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:648 in execute                                        
+                                                                                
+    645 │   │   │   raise NotImplementedError(                                  
+    646 │   │   │   │   "Async query is not supported in stored procedure yet"  
+    647 │   │   │   )                                                           
+  ❱ 648 │   │   result_set, result_meta = self.get_result_set(                  
+    649 │   │   │   plan,                                                       
+    650 │   │   │   to_pandas,                                                  
+    651 │   │   │   to_iter,                                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:427 in wrap                                     
+                                                                                
+     424 │   │   │   │   │   ne = SnowparkClientExceptionMessages.SQL_EXCEPTIO  
+     425 │   │   │   │   │   │   e, debug_context=debug_context                 
+     426 │   │   │   │   │   )                                                  
+  ❱  427 │   │   │   │   │   raise ne.with_traceback(tb) from None              
+     428 │   │   │                                                              
+     429 │   │   │   return wrap                                                
+     430                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:180 in wrap                                     
+                                                                                
+     177 │   │   │   │   )                                                      
+     178 │   │   │   │                                                          
+     179 │   │   │   │   try:                                                   
+  ❱  180 │   │   │   │   │   return func(*args, **kwargs)                       
+     181 │   │   │   │   except snowflake.connector.errors.ProgrammingError as  
+     182 │   │   │   │   │   from snowflake.snowpark._internal.analyzer.select  
+     183 │   │   │   │   │   │   Selectable,                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:770 in get_result_set                                 
+                                                                                
+    767 │   │   │   │   │   │   if i == len(main_queries) - 1 and dataframe_as  
+    768 │   │   │   │   │   │   │   kwargs[DATAFRAME_AST_PARAMETER] = datafram  
+    769 │   │   │   │   │   │   is_final_query = i == len(main_queries) - 1     
+  ❱ 770 │   │   │   │   │   │   result = self.run_query(                        
+    771 │   │   │   │   │   │   │   final_query,                                
+    772 │   │   │   │   │   │   │   to_pandas,                                  
+    773 │   │   │   │   │   │   │   to_iter and is_final_query,                 
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:137 in wrap                                           
+                                                                                
+    134 │   │   │   │   │   │   ex.cause                                        
+    135 │   │   │   │   │   )                                                   
+    136 │   │   │   │   except Exception as ex:                                 
+  ❱ 137 │   │   │   │   │   raise ex                                            
+    138 │   │   │                                                               
+    139 │   │   │   return wrap                                                 
+    140                                                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:131 in wrap                                           
+                                                                                
+    128 │   │   │   │   if args[0]._conn.is_closed():                           
+    129 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    130 │   │   │   │   try:                                                    
+  ❱ 131 │   │   │   │   │   return func(*args, **kwargs)                        
+    132 │   │   │   │   except ReauthenticationRequest as ex:                   
+    133 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    134 │   │   │   │   │   │   ex.cause                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:544 in run_query                                      
+                                                                                
+    541 │   │   │   if log_on_exception:                                        
+    542 │   │   │   │   query_id_log = f" [queryID: {ex.sfqid}]" if hasattr(ex  
+    543 │   │   │   │   logger.error(f"Failed to execute query{query_id_log} {  
+  ❱ 544 │   │   │   raise ex                                                    
+    545 │   │                                                                   
+    546 │   │   # fetch_pandas_all/batches() only works for SELECT statements   
+    547 │   │   # We call fetchall() if fetch_pandas_all/batches() fails,       
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:529 in run_query                                      
+                                                                                
+    526 │   │   │   if not is_sql_select_statement(query):                      
+    527 │   │   │   │   cached_analyze_attributes.clear_cache()                 
+    528 │   │   │   if block:                                                   
+  ❱ 529 │   │   │   │   results_cursor = self.execute_and_notify_query_listene  
+    530 │   │   │   │   │   query, params=params, **kwargs                      
+    531 │   │   │   │   )                                                       
+    532 │   │   │   │   logger.debug(f"Execute query [queryID: {results_cursor  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:459 in execute_and_notify_query_listener              
+                                                                                
+    456 │   │   │   self.notify_query_listeners(                                
+    457 │   │   │   │   QueryRecord(sfqid, err_query, False), is_error=True, *  
+    458 │   │   │   )                                                           
+  ❱ 459 │   │   │   raise ex                                                    
+    460 │   │                                                                   
+    461 │   │   notify_kwargs["requestId"] = str(results_cursor._request_id)    
+    462 │   │   self.notify_query_listeners(                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:450 in execute_and_notify_query_listener              
+                                                                                
+    447 │   │   │   if "_PLAN_UUID" in statement_params:                        
+    448 │   │   │   │   notify_kwargs["dataframe_uuid"] = statement_params["_P  
+    449 │   │   try:                                                            
+  ❱ 450 │   │   │   results_cursor = self._cursor.execute(query, **kwargs)      
+    451 │   │   except Exception as ex:                                         
+    452 │   │   │   notify_kwargs["requestId"] = None                           
+    453 │   │   │   notify_kwargs["exception"] = ex                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:1033 in execute                                                           
+                                                                                
+    1030 │   │   │   )                                                          
+    1031 │   │   │   query = query1                                             
+    1032 │   │                                                                  
+  ❱ 1033 │   │   ret = self._execute_helper(query, **kwargs)                    
+    1034 │   │   self._sfqid = (                                                
+    1035 │   │   │   ret["data"]["queryId"]                                     
+    1036 │   │   │   if "data" in ret and "queryId" in ret["data"]              
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:739 in _execute_helper                                                    
+                                                                                
+     736 │   │   │   )                                                          
+     737 │   │   ret: dict[str, Any] = {"data": {}}                             
+     738 │   │   try:                                                           
+  ❱  739 │   │   │   ret = self._connection.cmd_query(                          
+     740 │   │   │   │   query,                                                 
+     741 │   │   │   │   self._sequence_counter,                                
+     742 │   │   │   │   self._request_id,                                      
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/connec  
+  tion.py:1916 in cmd_query                                                     
+                                                                                
+    1913 │   │                                                                  
+    1914 │   │   url_parameters = {REQUEST_ID: request_id}                      
+    1915 │   │                                                                  
+  ❱ 1916 │   │   ret = self.rest.request(                                       
+    1917 │   │   │   "/queries/v1/query-request?" + urlencode(url_parameters),  
+    1918 │   │   │   data,                                                      
+    1919 │   │   │   client=client,                                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:487 in request                                                           
+                                                                                
+     484 │   │   if self._connection.service_name:                              
+     485 │   │   │   headers[HTTP_HEADER_SERVICE_NAME] = self._connection.serv  
+     486 │   │   if method == "post":                                           
+  ❱  487 │   │   │   return self._post_request(                                 
+     488 │   │   │   │   url,                                                   
+     489 │   │   │   │   headers,                                               
+     490 │   │   │   │   json.dumps(body, cls=SnowflakeRestfulJsonEncoder),     
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:782 in _post_request                                                     
+                                                                                
+     779 │   │   │   │   ret = self._renew_session()                            
+     780 │   │   │   except ReauthenticationRequest as ex:                      
+     781 │   │   │   │   if self._connection._authenticator != EXTERNAL_BROWSE  
+  ❱  782 │   │   │   │   │   raise ex.cause                                     
+     783 │   │   │   │   ret = self._connection._reauthenticate()               
+     784 │   │   │   logger.debug(                                              
+     785 │   │   │   │   "ret[code] = {code} after renew_session".format(       
+────────────────────────────────────────────────────────────────────────────────
+SnowparkSQLException: (1304): 390114 (08001): Authentication token has expired. 
+The user must authenticate again.
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:258 in <module>       
+                                                                                
+     255 st.caption("Explore funding rounds, investors, categories, and compan  
+     256                                                                        
+     257 session = get_session()                                                
+  ❱  258 companies_df, funding_df, merged_df = load_data(session)               
+     259                                                                        
+     260 if funding_df.empty or companies_df.empty:                             
+     261 │   st.error("No data available in Snowflake.")                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:281 in __call__                                                
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:326 in _get_or_create_cached_value                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:385 in _handle_cache_miss                                      
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:131 in load_data      
+                                                                                
+     128 │   │   │   status,                                                    
+     129 │   │   │   employee_count                                             
+     130 │   │   FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES                  
+  ❱  131 │   """).to_pandas()                                                   
+     132 │                                                                      
+     133 │   # FUNDING_ROUNDS table                                             
+     134 │   funding = _session.sql("""                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/telemetry.py:295 in wrap                                                   
+                                                                                
+    292 │   │   with session.query_history() as query_history:                  
+    293 │   │   │   try:                                                        
+    294 │   │   │   │   with ResourceUsageCollector() as resource_usage_collec  
+  ❱ 295 │   │   │   │   │   result = func(*args, **kwargs)                      
+    296 │   │   │   │   resource_usage = resource_usage_collector.get_resource  
+    297 │   │   │   finally:                                                    
+    298 │   │   │   │   if not session._collect_snowflake_plan_telemetry_at_cr  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/utils.py:1148 in call_wrapper                                              
+                                                                                
+    1145 │   │                                                                  
+    1146 │   │   # TODO: Could modify internal docstring to display that users  
+    1147 │   │                                                                  
+  ❱ 1148 │   │   return func(*args, **kwargs)                                   
+    1149 │                                                                      
+    1150 │   return call_wrapper                                                
+    1151                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/datafra  
+  me.py:1081 in to_pandas                                                       
+                                                                                
+    1078 │   │   │   _, kwargs[DATAFRAME_AST_PARAMETER] = self._session._ast_b  
+    1079 │   │                                                                  
+    1080 │   │   with open_telemetry_context_manager(self.to_pandas, self):     
+  ❱ 1081 │   │   │   result = self._session._conn.execute(                      
+    1082 │   │   │   │   self._plan,                                            
+    1083 │   │   │   │   to_pandas=True,                                        
+    1084 │   │   │   │   block=block,                                           
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:648 in execute                                        
+                                                                                
+    645 │   │   │   raise NotImplementedError(                                  
+    646 │   │   │   │   "Async query is not supported in stored procedure yet"  
+    647 │   │   │   )                                                           
+  ❱ 648 │   │   result_set, result_meta = self.get_result_set(                  
+    649 │   │   │   plan,                                                       
+    650 │   │   │   to_pandas,                                                  
+    651 │   │   │   to_iter,                                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:427 in wrap                                     
+                                                                                
+     424 │   │   │   │   │   ne = SnowparkClientExceptionMessages.SQL_EXCEPTIO  
+     425 │   │   │   │   │   │   e, debug_context=debug_context                 
+     426 │   │   │   │   │   )                                                  
+  ❱  427 │   │   │   │   │   raise ne.with_traceback(tb) from None              
+     428 │   │   │                                                              
+     429 │   │   │   return wrap                                                
+     430                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:180 in wrap                                     
+                                                                                
+     177 │   │   │   │   )                                                      
+     178 │   │   │   │                                                          
+     179 │   │   │   │   try:                                                   
+  ❱  180 │   │   │   │   │   return func(*args, **kwargs)                       
+     181 │   │   │   │   except snowflake.connector.errors.ProgrammingError as  
+     182 │   │   │   │   │   from snowflake.snowpark._internal.analyzer.select  
+     183 │   │   │   │   │   │   Selectable,                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:770 in get_result_set                                 
+                                                                                
+    767 │   │   │   │   │   │   if i == len(main_queries) - 1 and dataframe_as  
+    768 │   │   │   │   │   │   │   kwargs[DATAFRAME_AST_PARAMETER] = datafram  
+    769 │   │   │   │   │   │   is_final_query = i == len(main_queries) - 1     
+  ❱ 770 │   │   │   │   │   │   result = self.run_query(                        
+    771 │   │   │   │   │   │   │   final_query,                                
+    772 │   │   │   │   │   │   │   to_pandas,                                  
+    773 │   │   │   │   │   │   │   to_iter and is_final_query,                 
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:137 in wrap                                           
+                                                                                
+    134 │   │   │   │   │   │   ex.cause                                        
+    135 │   │   │   │   │   )                                                   
+    136 │   │   │   │   except Exception as ex:                                 
+  ❱ 137 │   │   │   │   │   raise ex                                            
+    138 │   │   │                                                               
+    139 │   │   │   return wrap                                                 
+    140                                                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:131 in wrap                                           
+                                                                                
+    128 │   │   │   │   if args[0]._conn.is_closed():                           
+    129 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    130 │   │   │   │   try:                                                    
+  ❱ 131 │   │   │   │   │   return func(*args, **kwargs)                        
+    132 │   │   │   │   except ReauthenticationRequest as ex:                   
+    133 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    134 │   │   │   │   │   │   ex.cause                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:544 in run_query                                      
+                                                                                
+    541 │   │   │   if log_on_exception:                                        
+    542 │   │   │   │   query_id_log = f" [queryID: {ex.sfqid}]" if hasattr(ex  
+    543 │   │   │   │   logger.error(f"Failed to execute query{query_id_log} {  
+  ❱ 544 │   │   │   raise ex                                                    
+    545 │   │                                                                   
+    546 │   │   # fetch_pandas_all/batches() only works for SELECT statements   
+    547 │   │   # We call fetchall() if fetch_pandas_all/batches() fails,       
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:529 in run_query                                      
+                                                                                
+    526 │   │   │   if not is_sql_select_statement(query):                      
+    527 │   │   │   │   cached_analyze_attributes.clear_cache()                 
+    528 │   │   │   if block:                                                   
+  ❱ 529 │   │   │   │   results_cursor = self.execute_and_notify_query_listene  
+    530 │   │   │   │   │   query, params=params, **kwargs                      
+    531 │   │   │   │   )                                                       
+    532 │   │   │   │   logger.debug(f"Execute query [queryID: {results_cursor  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:459 in execute_and_notify_query_listener              
+                                                                                
+    456 │   │   │   self.notify_query_listeners(                                
+    457 │   │   │   │   QueryRecord(sfqid, err_query, False), is_error=True, *  
+    458 │   │   │   )                                                           
+  ❱ 459 │   │   │   raise ex                                                    
+    460 │   │                                                                   
+    461 │   │   notify_kwargs["requestId"] = str(results_cursor._request_id)    
+    462 │   │   self.notify_query_listeners(                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:450 in execute_and_notify_query_listener              
+                                                                                
+    447 │   │   │   if "_PLAN_UUID" in statement_params:                        
+    448 │   │   │   │   notify_kwargs["dataframe_uuid"] = statement_params["_P  
+    449 │   │   try:                                                            
+  ❱ 450 │   │   │   results_cursor = self._cursor.execute(query, **kwargs)      
+    451 │   │   except Exception as ex:                                         
+    452 │   │   │   notify_kwargs["requestId"] = None                           
+    453 │   │   │   notify_kwargs["exception"] = ex                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:1033 in execute                                                           
+                                                                                
+    1030 │   │   │   )                                                          
+    1031 │   │   │   query = query1                                             
+    1032 │   │                                                                  
+  ❱ 1033 │   │   ret = self._execute_helper(query, **kwargs)                    
+    1034 │   │   self._sfqid = (                                                
+    1035 │   │   │   ret["data"]["queryId"]                                     
+    1036 │   │   │   if "data" in ret and "queryId" in ret["data"]              
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:739 in _execute_helper                                                    
+                                                                                
+     736 │   │   │   )                                                          
+     737 │   │   ret: dict[str, Any] = {"data": {}}                             
+     738 │   │   try:                                                           
+  ❱  739 │   │   │   ret = self._connection.cmd_query(                          
+     740 │   │   │   │   query,                                                 
+     741 │   │   │   │   self._sequence_counter,                                
+     742 │   │   │   │   self._request_id,                                      
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/connec  
+  tion.py:1916 in cmd_query                                                     
+                                                                                
+    1913 │   │                                                                  
+    1914 │   │   url_parameters = {REQUEST_ID: request_id}                      
+    1915 │   │                                                                  
+  ❱ 1916 │   │   ret = self.rest.request(                                       
+    1917 │   │   │   "/queries/v1/query-request?" + urlencode(url_parameters),  
+    1918 │   │   │   data,                                                      
+    1919 │   │   │   client=client,                                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:487 in request                                                           
+                                                                                
+     484 │   │   if self._connection.service_name:                              
+     485 │   │   │   headers[HTTP_HEADER_SERVICE_NAME] = self._connection.serv  
+     486 │   │   if method == "post":                                           
+  ❱  487 │   │   │   return self._post_request(                                 
+     488 │   │   │   │   url,                                                   
+     489 │   │   │   │   headers,                                               
+     490 │   │   │   │   json.dumps(body, cls=SnowflakeRestfulJsonEncoder),     
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:782 in _post_request                                                     
+                                                                                
+     779 │   │   │   │   ret = self._renew_session()                            
+     780 │   │   │   except ReauthenticationRequest as ex:                      
+     781 │   │   │   │   if self._connection._authenticator != EXTERNAL_BROWSE  
+  ❱  782 │   │   │   │   │   raise ex.cause                                     
+     783 │   │   │   │   ret = self._connection._reauthenticate()               
+     784 │   │   │   logger.debug(                                              
+     785 │   │   │   │   "ret[code] = {code} after renew_session".format(       
+────────────────────────────────────────────────────────────────────────────────
+SnowparkSQLException: (1304): 390114 (08001): Authentication token has expired. 
+The user must authenticate again.
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:129 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:689 in code_to_exec                                     
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:258 in <module>       
+                                                                                
+     255 st.caption("Explore funding rounds, investors, categories, and compan  
+     256                                                                        
+     257 session = get_session()                                                
+  ❱  258 companies_df, funding_df, merged_df = load_data(session)               
+     259                                                                        
+     260 if funding_df.empty or companies_df.empty:                             
+     261 │   st.error("No data available in Snowflake.")                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:281 in __call__                                                
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:326 in _get_or_create_cached_value                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/caching/  
+  cache_utils.py:385 in _handle_cache_miss                                      
+                                                                                
+  /mount/src/riskinsightsmedia-dashboard/streamlit_app.py:131 in load_data      
+                                                                                
+     128 │   │   │   status,                                                    
+     129 │   │   │   employee_count                                             
+     130 │   │   FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES                  
+  ❱  131 │   """).to_pandas()                                                   
+     132 │                                                                      
+     133 │   # FUNDING_ROUNDS table                                             
+     134 │   funding = _session.sql("""                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/telemetry.py:295 in wrap                                                   
+                                                                                
+    292 │   │   with session.query_history() as query_history:                  
+    293 │   │   │   try:                                                        
+    294 │   │   │   │   with ResourceUsageCollector() as resource_usage_collec  
+  ❱ 295 │   │   │   │   │   result = func(*args, **kwargs)                      
+    296 │   │   │   │   resource_usage = resource_usage_collector.get_resource  
+    297 │   │   │   finally:                                                    
+    298 │   │   │   │   if not session._collect_snowflake_plan_telemetry_at_cr  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/utils.py:1148 in call_wrapper                                              
+                                                                                
+    1145 │   │                                                                  
+    1146 │   │   # TODO: Could modify internal docstring to display that users  
+    1147 │   │                                                                  
+  ❱ 1148 │   │   return func(*args, **kwargs)                                   
+    1149 │                                                                      
+    1150 │   return call_wrapper                                                
+    1151                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/datafra  
+  me.py:1081 in to_pandas                                                       
+                                                                                
+    1078 │   │   │   _, kwargs[DATAFRAME_AST_PARAMETER] = self._session._ast_b  
+    1079 │   │                                                                  
+    1080 │   │   with open_telemetry_context_manager(self.to_pandas, self):     
+  ❱ 1081 │   │   │   result = self._session._conn.execute(                      
+    1082 │   │   │   │   self._plan,                                            
+    1083 │   │   │   │   to_pandas=True,                                        
+    1084 │   │   │   │   block=block,                                           
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:648 in execute                                        
+                                                                                
+    645 │   │   │   raise NotImplementedError(                                  
+    646 │   │   │   │   "Async query is not supported in stored procedure yet"  
+    647 │   │   │   )                                                           
+  ❱ 648 │   │   result_set, result_meta = self.get_result_set(                  
+    649 │   │   │   plan,                                                       
+    650 │   │   │   to_pandas,                                                  
+    651 │   │   │   to_iter,                                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:427 in wrap                                     
+                                                                                
+     424 │   │   │   │   │   ne = SnowparkClientExceptionMessages.SQL_EXCEPTIO  
+     425 │   │   │   │   │   │   e, debug_context=debug_context                 
+     426 │   │   │   │   │   )                                                  
+  ❱  427 │   │   │   │   │   raise ne.with_traceback(tb) from None              
+     428 │   │   │                                                              
+     429 │   │   │   return wrap                                                
+     430                                                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/analyzer/snowflake_plan.py:180 in wrap                                     
+                                                                                
+     177 │   │   │   │   )                                                      
+     178 │   │   │   │                                                          
+     179 │   │   │   │   try:                                                   
+  ❱  180 │   │   │   │   │   return func(*args, **kwargs)                       
+     181 │   │   │   │   except snowflake.connector.errors.ProgrammingError as  
+     182 │   │   │   │   │   from snowflake.snowpark._internal.analyzer.select  
+     183 │   │   │   │   │   │   Selectable,                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:770 in get_result_set                                 
+                                                                                
+    767 │   │   │   │   │   │   if i == len(main_queries) - 1 and dataframe_as  
+    768 │   │   │   │   │   │   │   kwargs[DATAFRAME_AST_PARAMETER] = datafram  
+    769 │   │   │   │   │   │   is_final_query = i == len(main_queries) - 1     
+  ❱ 770 │   │   │   │   │   │   result = self.run_query(                        
+    771 │   │   │   │   │   │   │   final_query,                                
+    772 │   │   │   │   │   │   │   to_pandas,                                  
+    773 │   │   │   │   │   │   │   to_iter and is_final_query,                 
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:137 in wrap                                           
+                                                                                
+    134 │   │   │   │   │   │   ex.cause                                        
+    135 │   │   │   │   │   )                                                   
+    136 │   │   │   │   except Exception as ex:                                 
+  ❱ 137 │   │   │   │   │   raise ex                                            
+    138 │   │   │                                                               
+    139 │   │   │   return wrap                                                 
+    140                                                                         
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:131 in wrap                                           
+                                                                                
+    128 │   │   │   │   if args[0]._conn.is_closed():                           
+    129 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    130 │   │   │   │   try:                                                    
+  ❱ 131 │   │   │   │   │   return func(*args, **kwargs)                        
+    132 │   │   │   │   except ReauthenticationRequest as ex:                   
+    133 │   │   │   │   │   raise SnowparkClientExceptionMessages.SERVER_SESSI  
+    134 │   │   │   │   │   │   ex.cause                                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:544 in run_query                                      
+                                                                                
+    541 │   │   │   if log_on_exception:                                        
+    542 │   │   │   │   query_id_log = f" [queryID: {ex.sfqid}]" if hasattr(ex  
+    543 │   │   │   │   logger.error(f"Failed to execute query{query_id_log} {  
+  ❱ 544 │   │   │   raise ex                                                    
+    545 │   │                                                                   
+    546 │   │   # fetch_pandas_all/batches() only works for SELECT statements   
+    547 │   │   # We call fetchall() if fetch_pandas_all/batches() fails,       
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:529 in run_query                                      
+                                                                                
+    526 │   │   │   if not is_sql_select_statement(query):                      
+    527 │   │   │   │   cached_analyze_attributes.clear_cache()                 
+    528 │   │   │   if block:                                                   
+  ❱ 529 │   │   │   │   results_cursor = self.execute_and_notify_query_listene  
+    530 │   │   │   │   │   query, params=params, **kwargs                      
+    531 │   │   │   │   )                                                       
+    532 │   │   │   │   logger.debug(f"Execute query [queryID: {results_cursor  
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:459 in execute_and_notify_query_listener              
+                                                                                
+    456 │   │   │   self.notify_query_listeners(                                
+    457 │   │   │   │   QueryRecord(sfqid, err_query, False), is_error=True, *  
+    458 │   │   │   )                                                           
+  ❱ 459 │   │   │   raise ex                                                    
+    460 │   │                                                                   
+    461 │   │   notify_kwargs["requestId"] = str(results_cursor._request_id)    
+    462 │   │   self.notify_query_listeners(                                    
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/snowpark/_intern  
+  al/server_connection.py:450 in execute_and_notify_query_listener              
+                                                                                
+    447 │   │   │   if "_PLAN_UUID" in statement_params:                        
+    448 │   │   │   │   notify_kwargs["dataframe_uuid"] = statement_params["_P  
+    449 │   │   try:                                                            
+  ❱ 450 │   │   │   results_cursor = self._cursor.execute(query, **kwargs)      
+    451 │   │   except Exception as ex:                                         
+    452 │   │   │   notify_kwargs["requestId"] = None                           
+    453 │   │   │   notify_kwargs["exception"] = ex                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:1033 in execute                                                           
+                                                                                
+    1030 │   │   │   )                                                          
+    1031 │   │   │   query = query1                                             
+    1032 │   │                                                                  
+  ❱ 1033 │   │   ret = self._execute_helper(query, **kwargs)                    
+    1034 │   │   self._sfqid = (                                                
+    1035 │   │   │   ret["data"]["queryId"]                                     
+    1036 │   │   │   if "data" in ret and "queryId" in ret["data"]              
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/cursor  
+  .py:739 in _execute_helper                                                    
+                                                                                
+     736 │   │   │   )                                                          
+     737 │   │   ret: dict[str, Any] = {"data": {}}                             
+     738 │   │   try:                                                           
+  ❱  739 │   │   │   ret = self._connection.cmd_query(                          
+     740 │   │   │   │   query,                                                 
+     741 │   │   │   │   self._sequence_counter,                                
+     742 │   │   │   │   self._request_id,                                      
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/connec  
+  tion.py:1916 in cmd_query                                                     
+                                                                                
+    1913 │   │                                                                  
+    1914 │   │   url_parameters = {REQUEST_ID: request_id}                      
+    1915 │   │                                                                  
+  ❱ 1916 │   │   ret = self.rest.request(                                       
+    1917 │   │   │   "/queries/v1/query-request?" + urlencode(url_parameters),  
+    1918 │   │   │   data,                                                      
+    1919 │   │   │   client=client,                                             
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:487 in request                                                           
+                                                                                
+     484 │   │   if self._connection.service_name:                              
+     485 │   │   │   headers[HTTP_HEADER_SERVICE_NAME] = self._connection.serv  
+     486 │   │   if method == "post":                                           
+  ❱  487 │   │   │   return self._post_request(                                 
+     488 │   │   │   │   url,                                                   
+     489 │   │   │   │   headers,                                               
+     490 │   │   │   │   json.dumps(body, cls=SnowflakeRestfulJsonEncoder),     
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/snowflake/connector/networ  
+  k.py:782 in _post_request                                                     
+                                                                                
+     779 │   │   │   │   ret = self._renew_session()                            
+     780 │   │   │   except ReauthenticationRequest as ex:                      
+     781 │   │   │   │   if self._connection._authenticator != EXTERNAL_BROWSE  
+  ❱  782 │   │   │   │   │   raise ex.cause                                     
+     783 │   │   │   │   ret = self._connection._reauthenticate()               
+     784 │   │   │   logger.debug(                                              
+     785 │   │   │   │   "ret[code] = {code} after renew_session".format(       
+────────────────────────────────────────────────────────────────────────────────
+SnowparkSQLException: (1304): 390114 (08001): Authentication token has expired. 
+The user must authenticate again.

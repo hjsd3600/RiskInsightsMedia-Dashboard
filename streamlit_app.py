@@ -149,7 +149,7 @@ def load_data(_session):
             company_name,
             website      AS website_url,
             linkedin_url,
-            category_group,
+            market_segment,
             subcategory,
             status,
             employee_count,
@@ -197,7 +197,7 @@ def load_data(_session):
     # Columns for merge
     merge_cols = [
         "company_id", "company_name", "website_url", "linkedin_url",
-        "category_group", "status"
+        "market_segment", "status"
     ]
     merge_cols = [c for c in merge_cols if c in companies.columns]
 
@@ -294,7 +294,7 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
         "lead_investor": "Lead Investor",
         "website_url": "Website",
         "linkedin_url": "LinkedIn",
-        "category_group": "Market Segment",
+        "market_segment": "Market Segment",
         "subcategory": "Product Category",
         "status": "Status",
         "employee_count_range": "Employee Count",
@@ -402,8 +402,8 @@ selected_stages = st.sidebar.multiselect("Funding Stage / Round", stage_options)
 investor_options = sorted(merged_df["lead_investor"].dropna().astype(str).unique())
 selected_investors = st.sidebar.multiselect("Lead Investor", investor_options)
 
-category_options = sorted(merged_df["category_group"].dropna().astype(str).unique()) \
-    if "category_group" in merged_df.columns else []
+category_options = sorted(merged_df["market_segment"].dropna().astype(str).unique()) \
+    if "market_segment" in merged_df.columns else []
 selected_categories = st.sidebar.multiselect("Market Segment", category_options)
 
 status_options = sorted(merged_df["status"].dropna().astype(str).unique()) \
@@ -430,8 +430,8 @@ if selected_stages:
     filtered = filtered[filtered["stage_or_funding_round"].isin(selected_stages)]
 if selected_investors:
     filtered = filtered[filtered["lead_investor"].isin(selected_investors)]
-if selected_categories and "category_group" in filtered.columns:
-    filtered = filtered[filtered["category_group"].isin(selected_categories)]
+if selected_categories and "market_segment" in filtered.columns:
+    filtered = filtered[filtered["market_segment"].isin(selected_categories)]
 if selected_status and "status" in filtered.columns:
     filtered = filtered[filtered["status"].isin(selected_status)]
 
@@ -571,8 +571,8 @@ with tab3:
 
     # Build from ALL companies (not just those with funding rounds)
     explorer_base = companies_df.copy()
-    if selected_categories and "category_group" in explorer_base.columns:
-        explorer_base = explorer_base[explorer_base["category_group"].isin(selected_categories)]
+    if selected_categories and "market_segment" in explorer_base.columns:
+        explorer_base = explorer_base[explorer_base["market_segment"].isin(selected_categories)]
     if selected_status and "status" in explorer_base.columns:
         explorer_base = explorer_base[explorer_base["status"].isin(selected_status)]
 
@@ -602,8 +602,8 @@ with tab3:
             st.markdown(f"#### {row['company_name']}")
 
             detail_list = []
-            if "category_group" in row and pd.notna(row["category_group"]):
-                detail_list.append(f"Market Segment: {row['category_group']}")
+            if "market_segment" in row and pd.notna(row["market_segment"]):
+                detail_list.append(f"Market Segment: {row['market_segment']}")
             if "status" in row and pd.notna(row["status"]):
                 detail_list.append(f"Status: {row['status']}")
 
@@ -641,8 +641,8 @@ funding_filtered = funding_df[funding_df["round_id"].isin(allowed_round_ids)]
 # Companies table: filter directly from companies_df so companies with no
 # funding rounds are still visible (they'd be excluded if we used allowed_company_ids)
 companies_filtered = companies_df.copy()
-if selected_categories and "category_group" in companies_filtered.columns:
-    companies_filtered = companies_filtered[companies_filtered["category_group"].isin(selected_categories)]
+if selected_categories and "market_segment" in companies_filtered.columns:
+    companies_filtered = companies_filtered[companies_filtered["market_segment"].isin(selected_categories)]
 if selected_status and "status" in companies_filtered.columns:
     companies_filtered = companies_filtered[companies_filtered["status"].isin(selected_status)]
 # Sort alphabetically
@@ -800,7 +800,7 @@ if is_admin and tab4 is not None:
                             sql = f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
                                 (COMPANY_ID, COMPANY_NAME, WEBSITE, LINKEDIN_URL,
-                                 CATEGORY_GROUP, SUBCATEGORY, STATUS,
+                                 MARKET_SEGMENT, SUBCATEGORY, STATUS,
                                  EMPLOYEE_COUNT_MIN, EMPLOYEE_COUNT_MAX,
                                  CREATED_AT, UPDATED_AT, CREATED_BY, UPDATED_BY)
                                 VALUES (
@@ -925,7 +925,7 @@ if is_admin and tab4 is not None:
                         "Network & Infrastructure Security", "Risk & Compliance",
                         "Security Awareness & Training", "Security Operations", "Security Services",
                     ]
-                    cur_seg = str(current.get("category_group", "") or "")
+                    cur_seg = str(current.get("market_segment", "") or "")
                     upd_segment = st.selectbox(
                         "Market Segment",
                         MARKET_SEGMENTS_UPD,
@@ -999,7 +999,7 @@ if is_admin and tab4 is not None:
                                     company_name        = {repr(upd_name.strip())},
                                     website             = {repr(upd_website.strip()) if upd_website.strip() else 'NULL'},
                                     linkedin_url        = {repr(upd_linkedin.strip()) if upd_linkedin.strip() else 'NULL'},
-                                    category_group      = {repr(upd_segment.strip()) if upd_segment.strip() else 'NULL'},
+                                    market_segment      = {repr(upd_segment.strip()) if upd_segment.strip() else 'NULL'},
                                     subcategory         = {repr(upd_category.strip()) if upd_category.strip() else 'NULL'},
                                     status              = {repr(upd_status) if upd_status else 'NULL'},
                                     employee_count_min  = {'NULL' if upd_emp_min is None else str(upd_emp_min)},
@@ -1206,7 +1206,7 @@ if is_contributor and tab4 is not None:
 
                 with st.form("suggest_edit_form"):
                     field_to_edit = st.selectbox("Which field to update?", [
-                        "company_name", "website", "linkedin_url", "category_group", "status", "employee_count_min"
+                        "company_name", "website", "linkedin_url", "market_segment", "status", "employee_count_min"
                     ])
                     old_val = str(c_current.get(field_to_edit, "") or "")
                     st.text_input("Current value (read-only)", value=old_val, disabled=True)
