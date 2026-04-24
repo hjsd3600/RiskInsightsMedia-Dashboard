@@ -662,11 +662,13 @@ if is_admin and tab4 is not None:
         st.markdown("### 🔒 Admin Panel")
         st.caption("Only you can see this tab. Use the forms below to manage data in Snowflake.")
 
-        admin_tab1, admin_tab2, admin_tab3, admin_tab4 = st.tabs([
+        admin_tab1, admin_tab2, admin_tab3, admin_tab4, admin_tab5, admin_tab6 = st.tabs([
             "➕ Add Company",
             "✏️ Update Company",
             "💰 Log Funding Round",
-            "📋 Review Suggestions"
+            "📋 Review Suggestions",
+            "🖊️ Edit / Delete Round",
+            "🔗 Merge Companies",
         ])
 
         # -------------------------
@@ -1075,11 +1077,13 @@ if is_admin and tab4 is not None:
                             cid2 = company_map2[fr_company]
                             now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-                            # Build amount string e.g. "$81000000"
+                            # Build amount string e.g. "$12500000" (preserves decimals)
                             symbol = CURRENCY_MAP[fr_currency_label]
                             multiplier = MULTIPLIER_MAP[fr_multiplier_label]
                             if fr_amount_raw > 0:
-                                amount_val = f"{symbol}{int(fr_amount_raw * multiplier)}"
+                                raw_total = fr_amount_raw * multiplier
+                                # Avoid int() so $12.5M is stored as $12500000 not $13000000
+                                amount_val = f"{symbol}{int(raw_total)}" if raw_total == int(raw_total) else f"{symbol}{raw_total:.2f}"
                             else:
                                 amount_val = None
 
@@ -1179,6 +1183,206 @@ if is_admin and tab4 is not None:
                                     st.rerun()
             except Exception as e:
                 st.error(f"❌ Could not load suggestions: {e}")
+
+        # -------------------------
+        # Admin Sub-Tab 5: Edit / Delete Funding Round
+        # -------------------------
+        with admin_tab5:
+            st.markdown("#### 🖊️ Edit or Delete a Funding Round")
+            st.caption("Select a company to view its rounds, then edit or delete individual entries.")
+
+            er_company_options = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            er_company_options = er_company_options.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
+            er_company_map = dict(zip(er_company_options["company_name"], er_company_options["company_id"]))
+
+            er_selected_company = st.selectbox(
+                "Select Company",
+                options=[""] + list(er_company_map.keys()),
+                key="er_company_select"
+            )
+
+            if er_selected_company:
+                er_cid = er_company_map[er_selected_company]
+                er_rounds = funding_df[funding_df["company_id"] == er_cid].copy()
+
+                if er_rounds.empty:
+                    st.info("No funding rounds found for this company.")
+                else:
+                    er_rounds = er_rounds.sort_values("created_at_dt", ascending=False)
+                    st.caption(f"{len(er_rounds)} round(s) found")
+
+                    FUNDING_STAGES_ER = [
+                        "", "Pre-Seed", "Grant", "Seed", "Venture Round",
+                        "A", "A1", "B", "B1", "C", "C1", "D", "D1",
+                        "E", "E1", "F", "F1", "G", "G1", "H", "H1",
+                        "I", "I1", "J", "J1",
+                        "Private Equity Round", "Debt Financing", "Post-IPO Debt Round",
+                    ]
+
+                    for idx, rnd in er_rounds.iterrows():
+                        rid = str(rnd["round_id"])
+                        stage = str(rnd.get("stage_or_funding_round") or "")
+                        amount = str(rnd.get("amount_raised_total") or "")
+                        investor = str(rnd.get("lead_investor") or "")
+                        amount_display = format_compact_amount(rnd.get("amount_num", 0)) if rnd.get("amount_num") else amount
+
+                        with st.container(border=True):
+                            col_info, col_edit, col_del = st.columns([3, 1, 1])
+                            with col_info:
+                                st.markdown(f"**{stage}** — {amount_display}")
+                                if investor:
+                                    st.caption(f"Lead: {investor}")
+                                if rnd.get("created_at_dt") and pd.notna(rnd["created_at_dt"]):
+                                    st.caption(f"Logged: {rnd['created_at_dt'].strftime('%Y-%m-%d')}")
+
+                            with col_edit:
+                                if st.button("✏️ Edit", key=f"edit_btn_{rid}"):
+                                    st.session_state[f"editing_{rid}"] = True
+
+                            with col_del:
+                                if st.button("🗑️ Delete", key=f"del_btn_{rid}"):
+                                    st.session_state[f"confirm_del_{rid}"] = True
+
+                            # Confirm delete
+                            if st.session_state.get(f"confirm_del_{rid}"):
+                                st.warning(f"Are you sure you want to delete this **{stage}** round?")
+                                c_yes, c_no = st.columns(2)
+                                with c_yes:
+                                    if st.button("Yes, Delete", key=f"yes_del_{rid}"):
+                                        try:
+                                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                                            session.sql(f"""
+                                                DELETE FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
+                                                WHERE round_id = '{rid}'
+                                            """).collect()
+                                            st.success("✅ Round deleted.")
+                                            st.session_state.pop(f"confirm_del_{rid}", None)
+                                            st.cache_data.clear()
+                                            st.rerun()
+                                        except Exception as e:
+                                            st.error(f"❌ Error deleting round: {e}")
+                                with c_no:
+                                    if st.button("Cancel", key=f"no_del_{rid}"):
+                                        st.session_state.pop(f"confirm_del_{rid}", None)
+                                        st.rerun()
+
+                            # Inline edit form
+                            if st.session_state.get(f"editing_{rid}"):
+                                with st.form(key=f"edit_round_form_{rid}"):
+                                    st.markdown("**Edit Round Details**")
+                                    new_stage = st.selectbox(
+                                        "Funding Stage",
+                                        FUNDING_STAGES_ER,
+                                        index=FUNDING_STAGES_ER.index(stage) if stage in FUNDING_STAGES_ER else 0
+                                    )
+                                    new_amount_str = st.text_input(
+                                        "Amount (exact stored value, e.g. $12500000)",
+                                        value=amount
+                                    )
+                                    new_investor = st.text_input("Lead Investor", value=investor)
+                                    save_edit = st.form_submit_button("Save Changes ✅")
+                                    cancel_edit = st.form_submit_button("Cancel")
+
+                                    if cancel_edit:
+                                        st.session_state.pop(f"editing_{rid}", None)
+                                        st.rerun()
+
+                                    if save_edit:
+                                        try:
+                                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                                            now_e = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                                            def _eq(val):
+                                                if val is None or str(val).strip() == "":
+                                                    return "NULL"
+                                                return "'" + str(val).replace("'", "''") + "'"
+                                            session.sql(f"""
+                                                UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
+                                                SET
+                                                    stage_or_funding_round = {_eq(new_stage)},
+                                                    amount_raised_total    = {_eq(new_amount_str.strip())},
+                                                    lead_investor          = {_eq(new_investor.strip())},
+                                                    updated_at             = TO_TIMESTAMP_NTZ('{now_e}'),
+                                                    updated_by             = {_eq(_current_user_display)}
+                                                WHERE round_id = '{rid}'
+                                            """).collect()
+                                            st.success("✅ Round updated!")
+                                            st.session_state.pop(f"editing_{rid}", None)
+                                            st.cache_data.clear()
+                                            st.rerun()
+                                        except Exception as e:
+                                            st.error(f"❌ Error updating round: {e}")
+
+        # -------------------------
+        # Admin Sub-Tab 6: Merge Companies
+        # -------------------------
+        with admin_tab6:
+            st.markdown("#### 🔗 Merge Duplicate Companies")
+            st.caption(
+                "Pick a **Primary** company to keep and one or more **Duplicates** to merge into it. "
+                "All funding rounds from duplicates will be reassigned to the primary, then duplicate records will be deleted."
+            )
+
+            merge_options = companies_df[["company_id", "company_name"]].dropna(subset=["company_name"])
+            merge_options = merge_options.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
+            all_company_names = list(merge_options["company_name"])
+            merge_name_to_id = dict(zip(merge_options["company_name"], merge_options["company_id"]))
+
+            primary_company = st.selectbox(
+                "✅ Primary Company (keep this one)",
+                options=[""] + all_company_names,
+                key="merge_primary_select"
+            )
+
+            if primary_company:
+                duplicate_options = [n for n in all_company_names if n != primary_company]
+                duplicate_companies = st.multiselect(
+                    "🗑️ Duplicate(s) to merge away",
+                    options=duplicate_options,
+                    key="merge_duplicates_select"
+                )
+
+                if duplicate_companies:
+                    primary_id = merge_name_to_id[primary_company]
+                    duplicate_ids = [merge_name_to_id[n] for n in duplicate_companies]
+
+                    st.markdown("**Preview of merge:**")
+                    st.write(f"- Primary: **{primary_company}** (`{primary_id}`)")  
+                    for dup_name, dup_id in zip(duplicate_companies, duplicate_ids):
+                        dup_round_count = len(funding_df[funding_df["company_id"] == dup_id])
+                        st.write(f"- Merge away: **{dup_name}** (`{dup_id}`) — {dup_round_count} round(s) will be reassigned")
+
+                    st.warning("⚠️ This action is irreversible. The duplicate company records will be permanently deleted.")
+
+                    if st.button("🔗 Confirm Merge", key="confirm_merge_btn"):
+                        try:
+                            session.sql(f"USE WAREHOUSE {st.secrets['snowflake']['warehouse']}").collect()
+                            errors = []
+                            for dup_name, dup_id in zip(duplicate_companies, duplicate_ids):
+                                try:
+                                    # Reassign all funding rounds from duplicate → primary
+                                    session.sql(f"""
+                                        UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
+                                        SET
+                                            company_id   = '{primary_id}',
+                                            company_name = '{primary_company.replace("'", "''")}'
+                                        WHERE company_id = '{dup_id}'
+                                    """).collect()
+                                    # Delete the duplicate company record
+                                    session.sql(f"""
+                                        DELETE FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.COMPANIES
+                                        WHERE company_id = '{dup_id}'
+                                    """).collect()
+                                except Exception as inner_e:
+                                    errors.append(f"{dup_name}: {inner_e}")
+
+                            if errors:
+                                st.error("Some merges failed:\n" + "\n".join(errors))
+                            else:
+                                st.success(f"✅ Successfully merged {len(duplicate_companies)} duplicate(s) into '{primary_company}'.")
+                                st.cache_data.clear()
+                                st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Merge failed: {e}")
 
 
 # ============================================================
