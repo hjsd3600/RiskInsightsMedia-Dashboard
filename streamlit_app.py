@@ -169,8 +169,9 @@ def load_data(_session):
             stage_or_funding_round,
             amount_raised_total,
             lead_investor,
-            website_url,
+            press_release_url,
             linkedin_url,
+            announced_date,
             created_at,
             updated_at
         FROM RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
@@ -193,6 +194,14 @@ def load_data(_session):
         )
     else:
         funding["created_at_dt"] = pd.NaT
+
+    # Parse announced_date
+    if "announced_date" in funding.columns:
+        funding["announced_date_dt"] = pd.to_datetime(
+            funding["announced_date"], errors="coerce"
+        )
+    else:
+        funding["announced_date_dt"] = pd.NaT
 
     # Columns for merge
     merge_cols = [
@@ -258,7 +267,7 @@ def _display_url(url):
 def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
 
     # Hide ID columns + technical columns
-    drop_cols = ["company_id", "round_id", "created_at", "created_at_dt"]
+    drop_cols = ["company_id", "round_id", "created_at", "created_at_dt", "announced_date_dt"]
     if not is_admin:
         drop_cols += ["updated_at", "updated_by"]
     df = df.drop(columns=drop_cols, errors="ignore").copy()
@@ -292,11 +301,13 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
         "stage_or_funding_round": "Funding",
         "amount_raised_total": "Amount Raised Total",
         "lead_investor": "Lead Investor",
+        "press_release_url": "Press Release",
         "website_url": "Website",
         "linkedin_url": "LinkedIn",
         "market_segment": "Market Segment",
         "subcategory": "Product Category",
         "status": "Status",
+        "announced_date": "Announced Date",
         "employee_count_range": "Employee Count",
         "updated_at": "Last Edited At",
         "updated_by": "Last Edited By",
@@ -311,6 +322,12 @@ def display_table(df: pd.DataFrame, table_name: str, is_admin: bool = False):
     col_config = {}
 
     # Ensure URLs have protocol so LinkColumn makes them clickable
+    if "Press Release" in df.columns:
+        df["Press Release"] = df["Press Release"].apply(format_url)
+        col_config["Press Release"] = st.column_config.LinkColumn(
+            "Press Release",
+            display_text=r"https?://(?:www\.)?(.+)"
+        )
     if "Website" in df.columns:
         df["Website"] = df["Website"].apply(format_url)
         col_config["Website"] = st.column_config.LinkColumn(
@@ -588,27 +605,61 @@ with tab3:
     company_metrics = explorer_base.merge(funding_totals, on="company_id", how="left")
     company_metrics["total_funding"] = company_metrics["total_funding"].fillna(0)
 
-    # Sort and search
-    company_search = st.text_input("🔍 Search companies", placeholder="Type a company name...", key="company_explorer_search")
+    # Sort alphabetically
     company_metrics = company_metrics.sort_values("company_name", key=lambda s: s.str.lower().fillna(""))
-    if company_search.strip():
-        company_metrics = company_metrics[company_metrics["company_name"].str.contains(company_search.strip(), case=False, na=False)]
-    top_companies = company_metrics
 
+    # Fast selectbox search (faster than text_input for large lists)
+    company_names_list = sorted(
+        company_metrics["company_name"].dropna().astype(str).unique().tolist(),
+        key=str.lower
+    )
+    selected_explorer_company = st.selectbox(
+        "🔍 Search companies",
+        options=[""] + company_names_list,
+        key="company_explorer_search",
+        placeholder="Select a company..."
+    )
 
-    for _, row in top_companies.iterrows():
+    if selected_explorer_company:
+        display_companies = company_metrics[company_metrics["company_name"] == selected_explorer_company]
+    else:
+        display_companies = company_metrics
+
+    st.caption(f"{len(display_companies)} companies")
+
+    for _, row in display_companies.iterrows():
         with st.container(border=True):
 
             st.markdown(f"#### {row['company_name']}")
 
+            # Company details line
             detail_list = []
-            if "market_segment" in row and pd.notna(row["market_segment"]):
-                detail_list.append(f"Market Segment: {row['market_segment']}")
-            if "status" in row and pd.notna(row["status"]):
-                detail_list.append(f"Status: {row['status']}")
+            if "market_segment" in row and pd.notna(row["market_segment"]) and str(row["market_segment"]).strip():
+                detail_list.append(f"**Segment:** {row['market_segment']}")
+            if "subcategory" in row and pd.notna(row["subcategory"]) and str(row["subcategory"]).strip():
+                detail_list.append(f"**Category:** {row['subcategory']}")
+            if "status" in row and pd.notna(row["status"]) and str(row["status"]).strip():
+                detail_list.append(f"**Status:** {row['status']}")
+
+            # Employee count range
+            emp_min = row.get("employee_count_min")
+            emp_max = row.get("employee_count_max")
+            emp_legacy = row.get("employee_count")
+            try:
+                lo = int(emp_min) if pd.notna(emp_min) else None
+                hi = int(emp_max) if pd.notna(emp_max) else None
+            except (ValueError, TypeError):
+                lo, hi = None, None
+            if lo is not None and hi is not None:
+                emp_str = f"{lo:,}" if lo == hi else f"{lo:,}-{hi:,}"
+                detail_list.append(f"**Employees:** {emp_str}")
+            elif lo is not None:
+                detail_list.append(f"**Employees:** {lo:,}+")
+            elif emp_legacy and str(emp_legacy).strip() not in ("", "None", "nan"):
+                detail_list.append(f"**Employees:** {str(emp_legacy).strip()}")
 
             if detail_list:
-                st.markdown(" • ".join(detail_list))
+                st.markdown(" &nbsp;•&nbsp; ".join(detail_list))
 
             cols = st.columns([1, 3])
 
@@ -617,14 +668,52 @@ with tab3:
                 linkedin = format_url(row.get("linkedin_url"))
 
                 if website:
-                    st.link_button("Website", website, width="stretch")
+                    st.link_button("🌐 Website", website, use_container_width=True)
                 if linkedin:
-                    st.link_button("LinkedIn", linkedin, width="stretch")
+                    st.link_button("💼 LinkedIn", linkedin, use_container_width=True)
+
+                tf = format_compact_amount(row.get("total_funding", 0))
+                st.metric("Total Funding", tf)
 
             with cols[1]:
-                tf = format_compact_amount(row.get("total_funding", 0))
-                st.markdown("**Funding Summary**")
-                st.write(f"- Total funding: {tf}")
+                # Show distinct funding rounds for this company
+                cid = row["company_id"]
+                company_rounds = funding_df[funding_df["company_id"] == cid].copy()
+
+                if company_rounds.empty:
+                    st.caption("No funding rounds recorded yet.")
+                else:
+                    # Sort by announced date first, then created_at (newest first)
+                    company_rounds = company_rounds.sort_values(
+                        ["announced_date_dt", "created_at_dt"],
+                        ascending=[False, False],
+                        na_position="last"
+                    )
+
+                    st.markdown(f"**Funding Rounds** ({len(company_rounds)})")
+
+                    for _, rnd in company_rounds.iterrows():
+                        stage = rnd.get("stage_or_funding_round") or "—"
+                        amount_display = format_compact_amount(rnd.get("amount_num", 0)) if pd.notna(rnd.get("amount_num")) else (str(rnd.get("amount_raised_total") or "—"))
+                        investor = rnd.get("lead_investor")
+                        announced = rnd.get("announced_date_dt")
+                        round_date = rnd.get("created_at_dt")
+
+                        # Build round line
+                        parts = [f"**{stage}**", f"— {amount_display}"]
+                        if investor and pd.notna(investor) and str(investor).strip():
+                            parts.append(f"(Lead: {investor})")
+                        if announced and pd.notna(announced):
+                            parts.append(f"· Announced {announced.strftime('%b %d, %Y')}")
+                        elif round_date and pd.notna(round_date):
+                            parts.append(f"· {round_date.strftime('%b %Y')}")
+
+                        # Press release link
+                        pr_url = format_url(rnd.get("press_release_url"))
+                        if pr_url:
+                            parts.append(f"[📰 Press Release]({pr_url})")
+
+                        st.markdown(" ".join(parts))
 
 
 
@@ -1065,6 +1154,7 @@ if is_admin and tab4 is not None:
                 with amt_col3:
                     fr_multiplier_label = st.selectbox("Scale", list(MULTIPLIER_MAP.keys()))
 
+                fr_announced_date = st.date_input("Announced Date", value=None, help="Date the round was publicly announced")
                 fr_press_release = st.text_input("Press Release URL", placeholder="e.g. https://company.com/press")
 
                 submitted3 = st.form_submit_button("Log Funding Round ✅")
@@ -1093,10 +1183,12 @@ if is_admin and tab4 is not None:
                                 return "'" + str(val).replace("'", "''") + "'"
 
                             new_round_id = str(uuid.uuid4())
+                            announced_val = fr_announced_date.strftime('%Y-%m-%d') if fr_announced_date else None
                             session.sql(f"""
                                 INSERT INTO RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
                                 (round_id, company_id, company_name, stage_or_funding_round,
-                                 amount_raised_total, lead_investor, website_url,
+                                 amount_raised_total, lead_investor, press_release_url,
+                                 announced_date,
                                  created_at, updated_at, created_by, updated_by)
                                 VALUES
                                 ({_fq(new_round_id)},
@@ -1106,6 +1198,7 @@ if is_admin and tab4 is not None:
                                  {_fq(amount_val)},
                                  {_fq(fr_investor.strip())},
                                  {_fq(fr_press_release.strip())},
+                                 {_fq(announced_val)},
                                  '{now}', '{now}', {repr(_current_user_display)}, {repr(_current_user_display)})
                             """).collect()
                             st.success(f"✅ Funding round logged for '{fr_company}'!")
