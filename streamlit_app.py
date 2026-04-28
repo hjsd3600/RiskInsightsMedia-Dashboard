@@ -1122,20 +1122,6 @@ if is_admin and tab4 is not None:
                 "Private Equity Round", "Debt Financing", "Post-IPO Debt Round",
             ]
 
-            CURRENCY_MAP = {
-                "USD ($)": "$",   "EUR (€)": "\u20ac",  "GBP (£)": "\u00a3",
-                "JPY (¥)": "\u00a5",  "INR (₹)": "\u20b9", "ILS (₪)": "\u20aa",
-                "AUD (A$)": "A$", "CAD (C$)": "C$",  "CHF": "CHF",
-                "CNY (¥)": "\u00a5", "HKD (HK$)": "HK$", "SGD (S$)": "S$",
-                "NZD (NZ$)": "NZ$",
-            }
-            MULTIPLIER_MAP = {
-                "Exact": 1,
-                "K (×1,000)": 1_000,
-                "M (×1,000,000)": 1_000_000,
-                "B (×1,000,000,000)": 1_000_000_000,
-            }
-
             with st.form("add_funding_form"):
                 fr_company = st.selectbox(
                     "Company *",
@@ -1144,15 +1130,11 @@ if is_admin and tab4 is not None:
                 )
                 fr_stage = st.selectbox("Funding Stage / Round *", FUNDING_STAGES)
                 fr_investor = st.text_input("Lead Investor", placeholder="e.g. Sequoia Capital")
-
-                st.markdown("**Amount Raised**")
-                amt_col1, amt_col2, amt_col3 = st.columns([2, 3, 2])
-                with amt_col1:
-                    fr_currency_label = st.selectbox("Currency", list(CURRENCY_MAP.keys()))
-                with amt_col2:
-                    fr_amount_raw = st.number_input("Amount", min_value=0.0, step=1.0, format="%.0f")
-                with amt_col3:
-                    fr_multiplier_label = st.selectbox("Scale", list(MULTIPLIER_MAP.keys()))
+                fr_amount_text = st.text_input(
+                    "Amount Raised",
+                    placeholder="e.g. $3.5M, €2B, $500K",
+                    help="Type currency + amount in abbreviated format. Snowflake will parse this automatically."
+                )
 
                 fr_announced_date = st.date_input("Announced Date", value=None, help="Date the round was publicly announced")
                 fr_press_release = st.text_input("Press Release URL", placeholder="e.g. https://company.com/press")
@@ -1167,15 +1149,7 @@ if is_admin and tab4 is not None:
                             cid2 = company_map2[fr_company]
                             now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-                            # Build amount string e.g. "$12500000" (preserves decimals)
-                            symbol = CURRENCY_MAP[fr_currency_label]
-                            multiplier = MULTIPLIER_MAP[fr_multiplier_label]
-                            if fr_amount_raw > 0:
-                                raw_total = fr_amount_raw * multiplier
-                                # Avoid int() so $12.5M is stored as $12500000 not $13000000
-                                amount_val = f"{symbol}{int(raw_total)}" if raw_total == int(raw_total) else f"{symbol}{raw_total:.2f}"
-                            else:
-                                amount_val = None
+                            amount_val = fr_amount_text.strip() if fr_amount_text.strip() else None
 
                             def _fq(val):
                                 if val is None or str(val).strip() == "":
@@ -1361,6 +1335,11 @@ if is_admin and tab4 is not None:
 
                             # Inline edit form
                             if st.session_state.get(f"editing_{rid}"):
+                                # Pre-fill current values for the new fields
+                                cur_announced = rnd.get("announced_date_dt")
+                                cur_announced_val = cur_announced.date() if pd.notna(cur_announced) else None
+                                cur_press_release = str(rnd.get("press_release_url") or "")
+
                                 with st.form(key=f"edit_round_form_{rid}"):
                                     st.markdown("**Edit Round Details**")
                                     new_stage = st.selectbox(
@@ -1368,11 +1347,28 @@ if is_admin and tab4 is not None:
                                         FUNDING_STAGES_ER,
                                         index=FUNDING_STAGES_ER.index(stage) if stage in FUNDING_STAGES_ER else 0
                                     )
-                                    new_amount_str = st.text_input(
-                                        "Amount (exact stored value, e.g. $12500000)",
-                                        value=amount
-                                    )
                                     new_investor = st.text_input("Lead Investor", value=investor)
+                                    new_amount_str = st.text_input(
+                                        "Amount Raised",
+                                        value=amount,
+                                        placeholder="e.g. $3.5M, €2B, $500K",
+                                        help="Type currency + amount in abbreviated format. Snowflake will parse this automatically.",
+                                        key=f"er_amt_{rid}"
+                                    )
+
+                                    new_announced_date = st.date_input(
+                                        "Announced Date",
+                                        value=cur_announced_val,
+                                        help="Date the round was publicly announced",
+                                        key=f"er_ann_{rid}"
+                                    )
+                                    new_press_release = st.text_input(
+                                        "Press Release URL",
+                                        value=cur_press_release if cur_press_release != "nan" else "",
+                                        placeholder="e.g. https://company.com/press",
+                                        key=f"er_pr_{rid}"
+                                    )
+
                                     save_edit = st.form_submit_button("Save Changes ✅")
                                     cancel_edit = st.form_submit_button("Cancel")
 
@@ -1388,12 +1384,17 @@ if is_admin and tab4 is not None:
                                                 if val is None or str(val).strip() == "":
                                                     return "NULL"
                                                 return "'" + str(val).replace("'", "''") + "'"
+
+                                            announced_edit_val = new_announced_date.strftime('%Y-%m-%d') if new_announced_date else None
+
                                             session.sql(f"""
                                                 UPDATE RISKINSIGHTSMEDIA_DB.ANALYTICS.FUNDING_ROUNDS
                                                 SET
                                                     stage_or_funding_round = {_eq(new_stage)},
-                                                    amount_raised_total    = {_eq(new_amount_str.strip())},
+                                                    amount_raised_total    = {_eq(new_amount_str.strip() if new_amount_str else '')},
                                                     lead_investor          = {_eq(new_investor.strip())},
+                                                    announced_date         = {_eq(announced_edit_val)},
+                                                    press_release_url      = {_eq(new_press_release.strip())},
                                                     updated_at             = TO_TIMESTAMP_NTZ('{now_e}'),
                                                     updated_by             = {_eq(_current_user_display)}
                                                 WHERE round_id = '{rid}'
