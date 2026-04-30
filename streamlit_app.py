@@ -220,6 +220,7 @@ def load_data(_session):
     return companies, funding, merged
 
 
+@st.cache_data(ttl=300)
 def get_last_updated(_session):
     try:
         df = _session.sql("""
@@ -626,6 +627,21 @@ with tab3:
         display_companies = company_metrics
 
     st.caption(f"{len(display_companies)} companies")
+
+    # Pagination — show 10 companies per page to avoid rendering all cards at once
+    PAGE_SIZE = 10
+    total_pages = max(1, (len(display_companies) + PAGE_SIZE - 1) // PAGE_SIZE)
+    page_num = st.number_input(
+        "Page", min_value=1, max_value=total_pages, value=1,
+        key="explorer_page", label_visibility="collapsed"
+    )
+    page_col1, page_col2 = st.columns([1, 3])
+    with page_col1:
+        st.caption(f"Page {page_num} of {total_pages}")
+
+    start_idx = (page_num - 1) * PAGE_SIZE
+    end_idx = start_idx + PAGE_SIZE
+    display_companies = display_companies.iloc[start_idx:end_idx]
 
     for _, row in display_companies.iterrows():
         with st.container(border=True):
@@ -1136,7 +1152,7 @@ if is_admin and tab4 is not None:
                     help="Type currency + amount in abbreviated format. Snowflake will parse this automatically."
                 )
 
-                fr_announced_date = st.date_input("Announced Date", value=None, help="Date the round was publicly announced")
+                fr_announced_date = st.date_input("Announced Date", value=None, format="MM/DD/YYYY", help="Date the round was publicly announced")
                 fr_press_release = st.text_input("Press Release URL", placeholder="e.g. https://company.com/press")
 
                 submitted3 = st.form_submit_button("Log Funding Round ✅")
@@ -1300,7 +1316,7 @@ if is_admin and tab4 is not None:
                                 if investor:
                                     st.caption(f"Lead: {investor}")
                                 if rnd.get("created_at_dt") and pd.notna(rnd["created_at_dt"]):
-                                    st.caption(f"Logged: {rnd['created_at_dt'].strftime('%Y-%m-%d')}")
+                                    st.caption(f"Logged: {rnd['created_at_dt'].strftime('%m/%d/%Y')}")
 
                             with col_edit:
                                 if st.button("✏️ Edit", key=f"edit_btn_{rid}"):
@@ -1359,6 +1375,7 @@ if is_admin and tab4 is not None:
                                     new_announced_date = st.date_input(
                                         "Announced Date",
                                         value=cur_announced_val,
+                                        format="MM/DD/YYYY",
                                         help="Date the round was publicly announced",
                                         key=f"er_ann_{rid}"
                                     )
