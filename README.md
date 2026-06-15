@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-The **Funding Intelligence Dashboard** is an interactive data analytics application built using **Streamlit** and **Snowflake**. It enables business users and analysts to explore funding activity, investors, and company insights in a visual and intuitive way.
+The **Funding Intelligence Dashboard** is an interactive data analytics application built using **Streamlit** and **Snowflake**. It enables business users and analysts to explore funding activity, investors, and company insights in a visual and intuitive way. 
 
 The dashboard connects securely to Snowflake using **key-pair authentication** and provides real-time analytics on:
 
