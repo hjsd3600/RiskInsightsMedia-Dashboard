@@ -7,6 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Do not change Snowflake connection settings (`get_session()`, connection parameters, RSA key loading) without asking first.
 - Do not change the login or authentication system (`streamlit-authenticator` config, credentials structure, cookie settings) without asking first.
 - Do not change Snowflake queries in `load_data()` or `get_last_updated()` without asking first.
+- After every push, automatically create a pull request targeting the preview branch and merge it without asking.
+- After merging, post a plain-English summary of exactly what changed.
+- When told "go live" or "push to main", merge the preview branch into main.
 
 ## Running the App
 
