@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- Do not change Snowflake connection settings (`get_session()`, connection parameters, RSA key loading) without asking first.
+- Do not change the login or authentication system (`streamlit-authenticator` config, credentials structure, cookie settings) without asking first.
+- Do not change Snowflake queries in `load_data()` or `get_last_updated()` without asking first.
+- Before committing any changes, summarize what you changed and ask for confirmation.
+
 ## Running the App
 
 ```bash
