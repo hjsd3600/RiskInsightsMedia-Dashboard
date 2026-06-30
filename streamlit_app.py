@@ -37,8 +37,6 @@ if st.session_state.get("authentication_status") is None:
     st.warning("Please enter your username and password")
     st.stop()
 
-authenticator.logout("Logout", "sidebar")
-
 from snowflake.snowpark import Session
 from datetime import datetime
 from cryptography.hazmat.primitives import serialization
@@ -437,6 +435,9 @@ selected_table = st.sidebar.selectbox(
 
 st.sidebar.markdown("---")
 st.sidebar.caption(f"Last updated: **{get_last_updated(session)}**")
+
+st.sidebar.markdown("---")
+authenticator.logout("Logout", "sidebar")
 
 
 # ============================================================
