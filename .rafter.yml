@@ -3,3 +3,5 @@ suppressions:
     reason: "No package-lock.json in this Python-only repo; i18next is not a dependency."
   - rule_id: R-F0B65
     reason: "No package-lock.json in this Python-only repo; form-data is not a dependency."
+  - rule_id: R-2A579
+    reason: "No package-lock.json in this Python-only repo; postcss is not a dependency."
